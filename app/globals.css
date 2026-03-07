@@ -1,0 +1,165 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* MTN Brighter Sans Font */
+@font-face {
+  font-family: 'MTN Brighter Sans';
+  font-weight: 300;
+  font-style: normal;
+  src: url('https://drive.google.com/uc?export=download&id=1fb7zGniFJLckxmqjpLlzUurVC6IuRpse') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MTN Brighter Sans';
+  font-weight: 400;
+  font-style: normal;
+  src: url('https://drive.google.com/uc?export=download&id=1pXf1wxbmaCPjRnVhCkCkRCgtHkIkgIVD') format('truetype');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MTN Brighter Sans';
+  font-weight: 700;
+  font-style: normal;
+  src: url('https://drive.google.com/uc?export=download&id=14-W8UuVoCaM0B_e85gdUa2RP3t02bzQz') format('truetype');
+  font-display: swap;
+}
+
+:root {
+  --mtn-yellow: #FFCB00;
+  --mtn-black: #000000;
+  --mtn-bg: #F8F8F8;
+  --mtn-grey: #E5E5E5;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: 'MTN Brighter Sans', system-ui, -apple-system, sans-serif;
+  background-color: var(--mtn-bg);
+  color: var(--mtn-black);
+}
+
+body {
+  background: #F8F8F8;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #F8F8F8; }
+::-webkit-scrollbar-thumb { background: #FFCB00; border-radius: 3px; }
+
+/* MTN Yellow highlight */
+::selection { background: rgba(255, 203, 0, 0.3); }
+
+/* Custom utilities */
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+
+  .mtn-card {
+    @apply bg-white rounded-2xl shadow-sm border border-mtn-grey overflow-hidden;
+  }
+
+  .mtn-btn-primary {
+    @apply bg-mtn-yellow text-mtn-black font-bold px-6 py-3 rounded-xl hover:bg-yellow-400 
+           transition-all duration-200 active:scale-95 min-h-[44px] inline-flex items-center 
+           justify-center gap-2;
+  }
+
+  .mtn-btn-secondary {
+    @apply bg-mtn-black text-white font-semibold px-6 py-3 rounded-xl hover:bg-gray-800 
+           transition-all duration-200 active:scale-95 min-h-[44px] inline-flex items-center 
+           justify-center gap-2;
+  }
+
+  .mtn-btn-outline {
+    @apply border-2 border-mtn-black text-mtn-black font-semibold px-6 py-3 rounded-xl 
+           hover:bg-mtn-black hover:text-white transition-all duration-200 active:scale-95 
+           min-h-[44px] inline-flex items-center justify-center gap-2;
+  }
+
+  .device-hotspot {
+    @apply absolute cursor-pointer transition-all duration-200 hover:scale-110 active:scale-95;
+  }
+
+  .status-active { @apply bg-green-500; }
+  .status-idle { @apply bg-gray-400; }
+  .status-offline { @apply bg-red-500; }
+  .status-streaming { @apply bg-blue-500; }
+  .status-charging { @apply bg-yellow-400; }
+
+  .panel-overlay {
+    @apply fixed inset-0 bg-black/40 backdrop-blur-sm z-40;
+  }
+
+  .device-panel {
+    @apply fixed right-0 top-0 h-full w-full sm:w-[420px] bg-white z-50 
+           shadow-2xl overflow-y-auto;
+  }
+
+  .room-card {
+    @apply relative cursor-pointer rounded-2xl overflow-hidden transition-all duration-300
+           hover:scale-[1.02] hover:shadow-xl active:scale-[0.98];
+  }
+
+  .notification-toast {
+    @apply fixed bottom-6 left-1/2 -translate-x-1/2 bg-mtn-black text-white px-6 py-3 
+           rounded-full font-semibold text-sm shadow-xl z-[100] flex items-center gap-2
+           animate-slide-in-up;
+  }
+}
+
+/* Room scene transitions */
+.scene-evening {
+  filter: sepia(0.3) saturate(1.2) brightness(0.85);
+}
+.scene-night {
+  filter: sepia(0.2) saturate(0.8) brightness(0.6) hue-rotate(220deg);
+}
+.scene-day {
+  filter: none;
+}
+
+/* Isometric home grid */
+.iso-container {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+/* Device animation states */
+.device-on { opacity: 1; }
+.device-off { opacity: 0.5; filter: grayscale(1); }
+
+/* Pulse ring for active devices */
+.pulse-ring::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 203, 0, 0.6);
+  animation: pulseYellow 2s infinite;
+}
+
+/* Smooth page transitions */
+.page-enter {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Glass card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* MTN gradient */
+.mtn-gradient {
+  background: linear-gradient(135deg, #FFCB00 0%, #F59E0B 100%);
+}
