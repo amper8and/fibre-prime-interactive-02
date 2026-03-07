@@ -2,26 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-/* MTN Brighter Sans Font */
+/* MTN Brighter Sans Font - load from local public/fonts once deployed */
 @font-face {
   font-family: 'MTN Brighter Sans';
   font-weight: 300;
   font-style: normal;
-  src: url('https://drive.google.com/uc?export=download&id=1fb7zGniFJLckxmqjpLlzUurVC6IuRpse') format('truetype');
+  src: url('/fonts/MTNBrighterSans-Light.ttf') format('truetype'),
+       local('system-ui');
   font-display: swap;
 }
 @font-face {
   font-family: 'MTN Brighter Sans';
   font-weight: 400;
   font-style: normal;
-  src: url('https://drive.google.com/uc?export=download&id=1pXf1wxbmaCPjRnVhCkCkRCgtHkIkgIVD') format('truetype');
+  src: url('/fonts/MTNBrighterSans-Regular.ttf') format('truetype'),
+       local('system-ui');
   font-display: swap;
 }
 @font-face {
   font-family: 'MTN Brighter Sans';
   font-weight: 700;
   font-style: normal;
-  src: url('https://drive.google.com/uc?export=download&id=14-W8UuVoCaM0B_e85gdUa2RP3t02bzQz') format('truetype');
+  src: url('/fonts/MTNBrighterSans-Bold.ttf') format('truetype'),
+       local('system-ui');
   font-display: swap;
 }
 
