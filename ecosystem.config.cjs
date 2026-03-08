@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'mtn-fibre-prime',
-      script: 'node_modules/.bin/next',
-      args: 'start -p 3000',
+      script: 'npx',
+      args: 'serve out -p 3000 -s',
       cwd: '/home/user/webapp',
       env: {
         NODE_ENV: 'production',

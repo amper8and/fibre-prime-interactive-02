@@ -8,12 +8,12 @@ import Navigation from '@/components/ui/Navigation';
 import NotificationToast from '@/components/ui/NotificationToast';
 import DevicePanel from '@/components/device-panels/DevicePanel';
 import RoomView from '@/components/rooms/RoomView';
-import { Sun, Sunset, Moon, ShoppingBag, ArrowLeft, Grid3X3, LayoutGrid } from 'lucide-react';
+import { Sun, Sunset, Moon, ShoppingBag, ArrowLeft, Grid3X3, LayoutGrid, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 
 type Scene = 'day' | 'evening' | 'night';
 
-const sceneConfig: Record<Scene, { label: string; icon: React.FC<{ size?: number; className?: string }>; filter: string; bg: string; accent: string }> = {
+const sceneConfig: Record<Scene, { label: string; icon: LucideIcon; filter: string; bg: string; accent: string }> = {
   day: {
     label: 'Day',
     icon: Sun,

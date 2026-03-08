@@ -5,10 +5,11 @@ import { CheckCircle } from 'lucide-react';
 export default function NotificationToast() {
   const { notification } = useAppStore();
   if (!notification) return null;
+
   return (
-    <div className="notification-toast">
-      <CheckCircle size={18} className="text-mtn-yellow" />
-      {notification.message}
+    <div className="fp-toast">
+      <CheckCircle size={16} className="text-[#FFCB00] shrink-0" />
+      <span>{notification.message}</span>
     </div>
   );
 }

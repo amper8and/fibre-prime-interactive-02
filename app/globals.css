@@ -170,7 +170,7 @@ input, textarea, select { font-family: inherit; }
            border border-white/25
            px-6 py-3 min-h-[44px]
            rounded-xl transition-all duration-200
-           hover:border-white/60 hover:bg-white/6 active:scale-[0.97];
+           hover:border-white/60 active:scale-[0.97];
   }
   .btn-ghost-dark {
     @apply inline-flex items-center justify-center gap-2
@@ -331,11 +331,12 @@ input, textarea, select { font-family: inherit; }
            focus:outline-none focus:border-[#FFCB00] focus:ring-2 focus:ring-[#FFCB00]/15;
   }
   .fp-input-dark {
-    @apply w-full bg-white/8 border border-white/15 text-white
+    background: rgba(255,255,255,0.07);
+    @apply w-full border border-white/15 text-white
            placeholder-white/30
            px-4 py-3 rounded-xl text-sm
            transition-colors duration-200
-           focus:outline-none focus:border-[#FFCB00]/60 focus:ring-2 focus:ring-[#FFCB00]/10;
+           focus:outline-none focus:border-[#FFCB00]/60;
   }
 
   /* ── Toggle ── */
