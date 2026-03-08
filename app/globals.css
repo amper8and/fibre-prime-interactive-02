@@ -6,19 +6,19 @@
 @font-face {
   font-family: 'MTN Brighter Sans';
   font-weight: 300;
-  src: url('/fonts/MTNBrighterSans-Light.ttf') format('truetype');
+  src: url('/fibre-prime-interactive-02/fonts/MTNBrighterSans-Light.ttf') format('truetype');
   font-display: swap;
 }
 @font-face {
   font-family: 'MTN Brighter Sans';
   font-weight: 400;
-  src: url('/fonts/MTNBrighterSans-Regular.ttf') format('truetype');
+  src: url('/fibre-prime-interactive-02/fonts/MTNBrighterSans-Regular.ttf') format('truetype');
   font-display: swap;
 }
 @font-face {
   font-family: 'MTN Brighter Sans';
   font-weight: 700;
-  src: url('/fonts/MTNBrighterSans-Bold.ttf') format('truetype');
+  src: url('/fibre-prime-interactive-02/fonts/MTNBrighterSans-Bold.ttf') format('truetype');
   font-display: swap;
 }
 
