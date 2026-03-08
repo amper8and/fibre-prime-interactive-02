@@ -1,104 +1,129 @@
 # MTN Fibre Prime — Interactive Home Experience
 
-## 🏠 Project Overview
-- **Product**: MTN Fibre Prime Interactive Home Experience
-- **Goal**: Demonstrate how MTN Fibre Prime powers a connected Lagos smart home ecosystem
-- **Tagline**: _Not just internet. An ecosystem._
+## Project Overview
+- **Name**: MTN Fibre Prime Interactive
+- **Goal**: Showcase the MTN Fibre Prime connected home ecosystem through an interactive digital twin of a 3-bedroom Lagos home.
+- **Version**: v2.0 — Full UI/UX Redesign (March 2026)
 
-## 🔗 URLs
-- **Live (Sandbox)**: https://3000-iduulkiwo7odwm1ad6hvo-d0b9e1e2.sandbox.novita.ai
-- **GitHub Repo**: https://github.com/amper8and/fibre-prime-interactive-02
+## 🌐 URLs
+- **GitHub Pages (Live)**: https://amper8and.github.io/fibre-prime-interactive-02/
+- **GitHub Repository**: https://github.com/amper8and/fibre-prime-interactive-02
+- **Sandbox Preview**: https://3000-iduulkiwo7odwm1ad6hvo-d0b9e1e2.sandbox.novita.ai
 
-## 📱 Pages
-| Route | Description |
-|---|---|
-| `/` | Landing page — hero, room preview, features, testimonials |
-| `/experience` | Interactive home — floor plan + all 7 rooms |
-| `/experience?room=living-room` | Deep-link to any room |
-| `/marketplace` | Full service/device catalogue |
-| `/bundles` | Custom bundle builder |
-| `/plans` | Fibre plans + availability checker |
+## 📄 Pages
 
-## 🏠 Rooms Implemented
-1. **Living Room** — Smart TV, Gaming Console, Smart Speaker, Streaming Box, Robot Vacuum
-2. **Master Bedroom** — Smart Lighting, Smart Thermostat, Smart Curtains
-3. **Kids Bedroom** — Gaming System, Smart Speaker, Study Desk
-4. **Kitchen** — Smart Fridge, Meal Delivery
-5. **Home Office** — High-Speed Fibre, Video Conferencing
-6. **Patio** — Outdoor Speakers, Baby Monitor
-7. **Garage** — Solar System, EV Charger
+| Path | Description |
+|------|-------------|
+| `/` | Landing page — hero, room grid, features, testimonials, CTA |
+| `/experience` | Interactive home — floor plan + 7 clickable rooms |
+| `/experience?room=<id>` | Individual room view with devices |
+| `/marketplace` | Filterable product/service catalog |
+| `/bundles` | Bundle builder — pick fibre plan + devices |
+| `/plans` | Fibre plans, availability checker, FAQ |
 
-## 🎮 Device Interaction System
-Each device follows: **Hover → Click → Panel Opens → Simulate Experience → Add to Bundle**
+## 🏠 Rooms & Devices
 
-## 💛 Brand
-- **Primary Yellow**: `#FFCB00`
-- **Primary Black**: `#000000`
-- **Background**: `#F8F8F8`
-- **Font**: MTN Brighter Sans (place fonts in `/public/fonts/`)
+| Room | Theme | Devices |
+|------|-------|---------|
+| Living Room | Entertainment Hub | Smart TV, Gaming Console, Smart Speaker, Streaming Box, Robot Vacuum |
+| Master Bedroom | Sleep & Comfort | Smart Lighting, Smart Thermostat, Smart Curtains |
+| Kids Bedroom | Safety + Fun | Kids Gaming System, Smart Speaker, Smart Study Desk |
+| Kitchen | Smart Convenience | Smart Fridge, Meal Delivery |
+| Home Office | Productivity | High-Speed Fibre, Video Conferencing |
+| Patio | Outdoor Living | Outdoor Speakers, Baby Monitor |
+| Garage | Green Technology | Solar System, EV Charger |
+
+## 🎨 Design System
+
+**Brand Colors**
+- Primary Yellow: `#FFCB00`
+- Black: `#000000`
+- Background: `#F5F5F5`
+- Border: `#E5E5E5`
+- Dark Panel: `#1A1A1A`
+
+**Typography**: MTN Brighter Sans (Light 300, Regular 400, Bold 700)
+
+**Layout**: 1400px max-width, 80px margin desktop, 12-column grid
+
+**Components**: Cards (12px radius), Buttons (primary/secondary/ghost), Status badges, Device hotspots, Slide-out panels, Toast notifications
 
 ## 🛠️ Tech Stack
-- **Framework**: Next.js 14 (App Router)
-- **UI**: React + Tailwind CSS
-- **Animations**: Framer Motion
-- **State**: Zustand
-- **Icons**: Lucide React
 
-## 🚀 Running Locally
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 14 (App Router, static export) |
+| Language | TypeScript |
+| Styling | Tailwind CSS + CSS custom properties |
+| Animations | Framer Motion |
+| State | Zustand |
+| Icons | Lucide React |
+| Fonts | MTN Brighter Sans (local TTF) |
+| Deploy | GitHub Pages (gh-pages branch) |
+
+## 🚀 Deployment
+
+### Local Development
 ```bash
 npm install
-npm run dev
-# Visit http://localhost:3000
+npm run build    # builds to out/
+npx serve out -p 3000
 ```
 
-## 🏗️ Building for Production
+### GitHub Pages
+The `out/` directory is deployed to the `gh-pages` branch automatically.
+
+### PM2 (sandbox)
 ```bash
 npm run build
-npm start
+pm2 start ecosystem.config.cjs
 ```
 
-## 📁 Project Structure
+## 📁 Folder Structure
 ```
-/app              → Next.js pages
-  /experience     → Interactive home page
-  /marketplace    → Marketplace page
-  /bundles        → Bundle builder page
-  /plans          → Fibre plans page
-/components
-  /home           → ExperienceClient (main home view)
-  /rooms          → RoomCard, RoomView
-  /device-panels  → DevicePanel, DeviceAnimation
-  /ui             → Navigation, NotificationToast
-/lib              → data.ts (all devices, rooms, bundles)
-/store            → Zustand state (useAppStore.ts)
-/public/fonts     → Place MTN Brighter Sans .ttf files here
+webapp/
+├── app/
+│   ├── page.tsx              # Landing page
+│   ├── experience/page.tsx   # Interactive home
+│   ├── bundles/page.tsx      # Bundle builder
+│   ├── marketplace/page.tsx  # Marketplace
+│   ├── plans/page.tsx        # Fibre plans
+│   ├── layout.tsx            # Root layout
+│   └── globals.css           # Design tokens + components
+├── components/
+│   ├── home/ExperienceClient.tsx   # Floor plan + room grid
+│   ├── rooms/RoomView.tsx          # Room detail + devices
+│   ├── device-panels/DevicePanel.tsx  # Slide-out device panel
+│   ├── ui/Navigation.tsx           # Dark premium navbar
+│   ├── ui/BundleWidget.tsx         # Floating bundle widget
+│   └── ui/NotificationToast.tsx    # Toast notification
+├── lib/data.ts               # All room/device/bundle data
+├── store/useAppStore.ts      # Zustand state management
+└── public/
+    ├── fonts/                # MTN Brighter Sans TTF files
+    └── icons/                # SVG icons + favicon
 ```
-
-## 🔤 Font Setup
-Download MTN Brighter Sans and place in `/public/fonts/`:
-- `MTNBrighterSans-Regular.ttf`
-- `MTNBrighterSans-Light.ttf`
-- `MTNBrighterSans-Bold.ttf`
-
-## 📊 Mock Data
-All pricing and device data is in `/lib/data.ts`. Update to connect to real APIs.
 
 ## ✅ Completed Features
-- [x] Landing page with hero, room grid, features, testimonials
-- [x] Interactive floor plan home view with 7 rooms
-- [x] All 7 rooms with devices and themes
-- [x] Device interaction panels with animations
-- [x] Bundle builder (add/remove devices, running total)
-- [x] Marketplace with search + category filtering
-- [x] Fibre plans page with availability checker
-- [x] Day/Evening/Night scene modes
-- [x] Responsive design (mobile/tablet/desktop)
-- [x] MTN brand colours and typography
-- [x] PWA manifest
+- [x] MTN brand design system (yellow #FFCB00, black, MTN Brighter Sans)
+- [x] Premium dark navigation bar
+- [x] Hero landing page with animated stats
+- [x] Interactive floor plan (click any room)
+- [x] 7 rooms with device detail cards
+- [x] Slide-out device panel with simulation
+- [x] Bundle builder (step-by-step)
+- [x] Marketplace with search + category filter
+- [x] Fibre plans with availability checker
+- [x] PWA manifest + favicon
+- [x] Responsive design (desktop/tablet/mobile)
+- [x] Continuous GitHub commits
 
 ## 🔜 Next Steps
-- [ ] Download and add MTN Brighter Sans font files
-- [ ] Deploy to Vercel/Netlify
-- [ ] Add real fibre availability API
-- [ ] Connect to real CMS for pricing
-- [ ] Add Three.js 3D home model (optional enhancement)
+- [ ] Three.js isometric 3D home (replace CSS floor plan)
+- [ ] Real-time device state WebSockets
+- [ ] Checkout / payment integration
+- [ ] Push notifications (PWA)
+- [ ] Animated device simulations (per device type)
+
+---
+© 2026 MTN Nigeria Communications Plc.
