@@ -1,34 +1,29 @@
-'use client';
-import { useState } from 'react';
+﻿'use client';
+
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fibrePlans } from '@/lib/data';
+import { ArrowRight, Check, ChevronDown, MapPin, Shield, Sparkles, Wifi, Zap } from 'lucide-react';
 import Navigation from '@/components/ui/Navigation';
 import NotificationToast from '@/components/ui/NotificationToast';
-import {
-  Check, Wifi, Zap, Shield, Phone, MapPin,
-  ArrowRight, ChevronDown, ChevronUp, Star,
-} from 'lucide-react';
+import SiteFooter from '@/components/ui/SiteFooter';
+import { fibrePlans } from '@/lib/data';
 
 const faqs = [
   {
-    q: 'How long does installation take?',
-    a: 'Installation typically takes 3–5 business days after your order is confirmed. Our engineers will call to schedule a convenient time.',
+    question: 'How long does installation take?',
+    answer: 'Installation typically takes 3 to 5 business days after order confirmation, subject to location readiness and scheduling.',
   },
   {
-    q: 'Is there a data cap?',
-    a: 'No. All MTN Fibre Prime plans come with unlimited data. Stream, browse and work without worrying about limits.',
+    question: 'Is the service capped?',
+    answer: 'The plans showcased here are designed around an unlimited home-fibre experience for streaming, work and entertainment.',
   },
   {
-    q: 'What router is included?',
-    a: 'All plans include a free Wi-Fi 6 router. Premium plans (500 Mbps+) include a Wi-Fi 6E mesh router for whole-home coverage.',
+    question: 'Can I upgrade later?',
+    answer: 'Yes. Fibre Prime is designed to support upgrades as your household usage grows and more devices come online.',
   },
   {
-    q: 'Can I upgrade my plan later?',
-    a: 'Yes. You can upgrade or downgrade at any time. Changes take effect within 24 hours.',
-  },
-  {
-    q: 'Is there a contract?',
-    a: 'Plans are available month-to-month. No long-term contract required.',
+    question: 'Do plans include support?',
+    answer: 'Every plan includes support access, while higher tiers prioritize faster resolution and stronger whole-home performance guarantees.',
   },
 ];
 
@@ -37,292 +32,199 @@ export default function PlansPage() {
   const [address, setAddress] = useState('');
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  const selectedPlanData = useMemo(
+    () => fibrePlans.find((plan) => plan.id === selectedPlan) || fibrePlans[2],
+    [selectedPlan]
+  );
 
   const handleCheck = async () => {
-    if (!address.trim()) return;
+    if (!address.trim()) {
+      return;
+    }
     setChecking(true);
     setAvailable(null);
-    await new Promise((r) => setTimeout(r, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1200));
     setAvailable(true);
     setChecking(false);
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5]">
+    <div className="min-h-screen">
       <Navigation />
       <NotificationToast />
 
-      {/* ── Header ── */}
-      <div className="pt-[var(--nav-height)] bg-black">
-        <div className="page-container py-14 text-center">
-          <div className="inline-flex items-center gap-2 bg-[#FFCB00]/12
-                          border border-[#FFCB00]/30 text-[#FFCB00]
-                          px-4 py-2 rounded-full text-sm font-semibold mb-8">
-            <Wifi size={14} />
-            Fast. Reliable. Unlimited.
-          </div>
-          <h1 className="text-[32px] sm:text-[48px] font-bold text-white mb-4 leading-tight">
-            Find Your Perfect{' '}
-            <span className="text-[#FFCB00]">Fibre Plan</span>
-          </h1>
-          <p className="text-white/45 max-w-lg mx-auto text-base leading-relaxed">
-            Blazing-fast fibre internet for Lagos homes. Unlimited data,
-            free installation, and 24/7 support.
-          </p>
-        </div>
-      </div>
+      <main className="pt-[calc(var(--nav-height)+0.75rem)]">
+        <section className="page-container pb-10">
+          <div className="grid gap-8 xl:grid-cols-[0.9fr_1.1fr] xl:items-start">
+            <div>
+              <p className="section-label">Fibre plans</p>
+              <h1 className="text-page mt-3 max-w-[10ch] text-black">Choose the plan that fits your home.</h1>
+              <p className="mt-4 max-w-xl text-base leading-relaxed text-black/60">
+                Scale from everyday streaming to a full premium connected-home setup with stronger support, lower latency and more simultaneous devices.
+              </p>
 
-      <div className="page-container py-12 space-y-16">
-
-        {/* ── Plans grid ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {fibrePlans.map((plan, i) => {
-            const isSelected = selectedPlan === plan.id;
-            return (
-              <motion.div
-                key={plan.id}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                onClick={() => setSelectedPlan(plan.id)}
-                className={`relative cursor-pointer rounded-2xl overflow-hidden
-                           transition-all duration-300 ${
-                  isSelected
-                    ? 'shadow-[0_8px_32px_rgba(255,203,0,0.25)] scale-[1.02] ring-2 ring-[#FFCB00]'
-                    : 'hover:shadow-[0_4px_20px_rgba(0,0,0,0.10)] hover:-translate-y-1'
-                } ${plan.highlighted ? 'bg-black' : 'bg-white border border-[#E5E5E5]'}`}
-              >
-                {/* Popular badge */}
-                {plan.highlighted && (
-                  <div className="bg-[#FFCB00] text-black text-[11px] font-bold
-                                  text-center py-2 uppercase tracking-[0.1em]
-                                  flex items-center justify-center gap-1">
-                    <Star size={10} fill="currentColor" /> Most Popular
-                  </div>
-                )}
-
-                <div className="p-6">
-                  {/* Speed */}
-                  <p
-                    className="text-[32px] font-bold leading-none mb-1"
-                    style={{ color: plan.highlighted ? '#FFCB00' : '#000' }}
-                  >
-                    {plan.speed}
-                  </p>
-                  <p className={`font-bold text-[16px] mb-4 ${plan.highlighted ? 'text-white' : 'text-black'}`}>
-                    {plan.name}
-                  </p>
-
-                  {/* Price */}
-                  <div className="mb-5">
-                    <span className={`text-[28px] font-bold ${plan.highlighted ? 'text-white' : 'text-black'}`}>
-                      ₦{plan.price.toLocaleString()}
-                    </span>
-                    <span className={`text-sm ${plan.highlighted ? 'text-white/40' : 'text-[#888]'}`}>
-                      /month
-                    </span>
-                  </div>
-
-                  {/* Features */}
-                  <ul className="space-y-2.5 mb-6">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2.5 text-sm">
-                        <Check size={13} className="text-[#FFCB00] shrink-0" />
-                        <span className={plan.highlighted ? 'text-white/70' : 'text-[#555]'}>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* CTA */}
-                  <button
-                    className={`w-full py-3 rounded-xl font-bold text-sm
-                               transition-all active:scale-[0.98] ${
-                      isSelected
-                        ? 'bg-[#FFCB00] text-black'
-                        : plan.highlighted
-                        ? 'bg-white/15 text-white hover:bg-[#FFCB00] hover:text-black'
-                        : 'bg-[#F5F5F5] text-black hover:bg-[#FFCB00]'
-                    }`}
-                  >
-                    {isSelected ? '✓ Selected' : 'Select Plan'}
-                  </button>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* ── Availability checker ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="bg-black rounded-3xl p-8 sm:p-14 text-center"
-        >
-          <div className="w-14 h-14 bg-[#FFCB00]/15 border border-[#FFCB00]/30
-                          rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <MapPin size={24} className="text-[#FFCB00]" />
-          </div>
-          <h2 className="text-[24px] sm:text-[32px] font-bold text-white mb-3">
-            Check Availability in Your Area
-          </h2>
-          <p className="text-white/40 mb-8 max-w-md mx-auto text-sm leading-relaxed">
-            Enter your Lagos address to check if MTN Fibre Prime is available
-            in your neighbourhood.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
-            <input
-              type="text"
-              placeholder="Enter your address in Lagos..."
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleCheck()}
-              className="fp-input-dark flex-1 text-sm"
-            />
-            <button
-              onClick={handleCheck}
-              disabled={!address.trim() || checking}
-              className="btn-primary px-8 py-3.5 rounded-xl whitespace-nowrap
-                         disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {checking ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-black border-t-transparent
-                                   rounded-full animate-spin" />
-                  Checking...
-                </>
-              ) : (
-                <>
-                  <Wifi size={16} /> Check Now
-                </>
-              )}
-            </button>
-          </div>
-
-          <AnimatePresence>
-            {available !== null && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.92, y: 8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.92 }}
-                className="mt-6 inline-flex items-center gap-3
-                           bg-emerald-500/12 border border-emerald-500/30
-                           text-emerald-400 px-6 py-3.5 rounded-2xl"
-              >
-                <Check size={18} />
-                <span className="font-semibold text-sm">
-                  MTN Fibre Prime is available at your address!
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {available && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mt-5"
-            >
-              <button className="btn-primary text-[15px] px-10 py-4 rounded-xl">
-                Order Now — Get Connected <ArrowRight size={18} />
-              </button>
-            </motion.div>
-          )}
-        </motion.div>
-
-        {/* ── Why MTN Fibre ── */}
-        <div>
-          <h2 className="section-title text-black text-center mb-8">
-            Why Choose MTN Fibre?
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {[
-              {
-                icon: <Zap size={22} className="text-[#FFCB00]" />,
-                title: 'Lightning Fast',
-                desc: 'Up to 1 Gbps download. Stream 4K, game online and video call — all at once.',
-              },
-              {
-                icon: <Shield size={22} className="text-[#FFCB00]" />,
-                title: '99.9% Uptime',
-                desc: 'SLA-backed reliability with redundant infrastructure across Lagos.',
-              },
-              {
-                icon: <Phone size={22} className="text-[#FFCB00]" />,
-                title: '24/7 Support',
-                desc: 'Nigeria-based support team available around the clock to help you.',
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                className="fp-card p-6 text-center"
-              >
-                <div className="w-12 h-12 bg-[#FFCB00]/10 rounded-2xl
-                                flex items-center justify-center mx-auto mb-4">
-                  {item.icon}
-                </div>
-                <h3 className="font-bold text-black mb-2">{item.title}</h3>
-                <p className="text-[#666] text-sm leading-relaxed">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── FAQ ── */}
-        <div className="max-w-2xl mx-auto">
-          <h2 className="section-title text-black text-center mb-8">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-2">
-            {faqs.map((faq, i) => {
-              const isOpen = openFaq === i;
-              return (
-                <div key={i} className="fp-card overflow-hidden">
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : i)}
-                    className="w-full px-5 py-4 text-left flex items-center
-                               justify-between gap-4 min-h-[56px]"
-                  >
-                    <span className="font-semibold text-black text-sm leading-snug">
-                      {faq.q}
-                    </span>
-                    {isOpen
-                      ? <ChevronUp size={16} className="text-[#888] shrink-0" />
-                      : <ChevronDown size={16} className="text-[#888] shrink-0" />
-                    }
-                  </button>
-                  <AnimatePresence>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.22 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-5 pb-5 border-t border-[#F0F0F0]">
-                          <p className="text-[#555] text-sm leading-relaxed pt-4">
-                            {faq.a}
-                          </p>
+              <div className="mt-8 space-y-4">
+                {fibrePlans.map((plan, index) => {
+                  const selected = selectedPlan === plan.id;
+                  return (
+                    <motion.button
+                      key={plan.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.32, delay: index * 0.05 }}
+                      onClick={() => setSelectedPlan(plan.id)}
+                      className={`w-full rounded-[28px] border p-5 text-left transition ${selected ? 'border-[#ffcb00] bg-white shadow-[0_18px_42px_rgba(255,203,0,0.16)]' : 'border-black/8 bg-white hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(5,5,5,0.08)]'}`}
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                          {plan.highlighted && <span className="rounded-full bg-[#ffcb00]/18 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-black">Recommended</span>}
+                          <p className="mt-3 text-[2rem] font-bold leading-none tracking-[-0.05em] text-black">{plan.speed}</p>
+                          <p className="mt-2 text-base font-semibold text-black/72">{plan.name}</p>
                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-black">N{plan.price.toLocaleString()}</p>
+                          <p className="text-sm text-black/44">per month</p>
+                        </div>
+                      </div>
+                      <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                        {plan.features.map((feature) => (
+                          <div key={feature} className="flex items-center gap-2 text-sm text-black/60">
+                            <Check size={14} className="text-[#8d6b00]" />
+                            {feature}
+                          </div>
+                        ))}
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </div>
 
-      </div>
+            <div className="space-y-6 xl:sticky xl:top-[calc(var(--nav-height)+16px)]">
+              <div className="fp-card-yellow p-6 sm:p-7">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="section-label text-black/48">Recommended upgrade</p>
+                    <h2 className="mt-3 text-[2.4rem] font-bold leading-none tracking-[-0.05em] text-black">{selectedPlanData.speed}</h2>
+                    <p className="mt-2 text-base font-semibold text-black/72">{selectedPlanData.name}</p>
+                  </div>
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-black text-white">
+                    <Wifi size={20} />
+                  </div>
+                </div>
+                <div className="mt-6 rounded-[24px] bg-white/78 p-5">
+                  <p className="text-3xl font-bold leading-none tracking-[-0.05em] text-black">N{selectedPlanData.price.toLocaleString()}<span className="ml-2 text-base font-medium tracking-normal text-black/42">per month</span></p>
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    {selectedPlanData.features.map((feature) => (
+                      <div key={feature} className="flex items-center gap-2 text-sm text-black/64">
+                        <Check size={14} className="text-[#8d6b00]" />
+                        {feature}
+                      </div>
+                    ))}
+                  </div>
+                  <button className="btn-primary mt-6 w-full justify-center">
+                    Upgrade now
+                    <ArrowRight size={16} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="fp-card p-6 sm:p-7">
+                <div className="flex items-start gap-4">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ffcb00]/18 text-black">
+                    <MapPin size={20} />
+                  </div>
+                  <div>
+                    <p className="section-label">Availability</p>
+                    <h3 className="mt-2 text-2xl font-bold tracking-[-0.04em] text-black">Check your address</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-black/58">Enter your home or office location to confirm Fibre Prime coverage.</p>
+                  </div>
+                </div>
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(event) => setAddress(event.target.value)}
+                    className="fp-input flex-1"
+                    placeholder="Enter your address"
+                  />
+                  <button onClick={handleCheck} disabled={!address.trim() || checking} className="btn-primary disabled:cursor-not-allowed disabled:opacity-55">
+                    {checking ? 'Checking...' : 'Check now'}
+                  </button>
+                </div>
+                <AnimatePresence>
+                  {available !== null && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="mt-4 rounded-[22px] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm font-semibold text-emerald-700">
+                      Fibre Prime is available at this address.
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="page-container pb-12">
+          <div className="grid gap-5 md:grid-cols-3">
+            <div className="fp-card p-6">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ffcb00]/18 text-black">
+                <Zap size={20} />
+              </div>
+              <h3 className="mt-5 text-2xl font-bold tracking-[-0.04em] text-black">Lower latency</h3>
+              <p className="mt-3 text-sm leading-relaxed text-black/58">Responsive enough for streaming, calls, gaming and simultaneous connected-home automation.</p>
+            </div>
+            <div className="fp-card p-6">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ffcb00]/18 text-black">
+                <Shield size={20} />
+              </div>
+              <h3 className="mt-5 text-2xl font-bold tracking-[-0.04em] text-black">Priority support</h3>
+              <p className="mt-3 text-sm leading-relaxed text-black/58">Higher tiers unlock stronger reliability and more premium support expectations for busy households.</p>
+            </div>
+            <div className="fp-card p-6">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ffcb00]/18 text-black">
+                <Sparkles size={20} />
+              </div>
+              <h3 className="mt-5 text-2xl font-bold tracking-[-0.04em] text-black">Room-ready bundles</h3>
+              <p className="mt-3 text-sm leading-relaxed text-black/58">Plans are designed to sit beneath a room-based ecosystem of devices, media and household services.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="page-container pb-16">
+          <div className="mx-auto max-w-3xl">
+            <p className="section-label text-center">FAQ</p>
+            <h2 className="section-title mt-3 text-center text-black">Questions about installation, upgrades and plan fit.</h2>
+            <div className="mt-8 space-y-3">
+              {faqs.map((faq, index) => {
+                const open = openFaq === index;
+                return (
+                  <div key={faq.question} className="fp-card overflow-hidden">
+                    <button
+                      onClick={() => setOpenFaq(open ? null : index)}
+                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+                    >
+                      <span className="text-base font-semibold text-black">{faq.question}</span>
+                      <ChevronDown size={18} className={`transition ${open ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {open && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden border-t border-black/8">
+                          <p className="px-5 py-5 text-sm leading-relaxed text-black/58">{faq.answer}</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }
+

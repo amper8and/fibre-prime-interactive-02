@@ -1,9 +1,10 @@
-import type { Metadata, Viewport } from 'next';
+﻿import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 const BASE = '/fibre-prime-interactive-02';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://amper8and.github.io'),
   title: 'MTN Fibre Prime | Interactive Home Experience',
   description: 'Explore the connected Lagos home powered by MTN Fibre Prime. Interact with smart devices, build custom bundles, and discover how MTN transforms your household into a connected ecosystem.',
   keywords: 'MTN, Fibre, Nigeria, smart home, connected home, Lagos, broadband, streaming',
@@ -40,12 +41,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-      </head>
-      <body className="font-mtn antialiased">
-        {children}
-      </body>
+      <head />
+      <body className="font-mtn antialiased">{children}</body>
     </html>
   );
 }

@@ -1,26 +1,19 @@
-import { create } from 'zustand';
-import { Device, devices as allDevices } from '@/lib/data';
+﻿import { create } from 'zustand';
+import { Device, bundleItemsCatalog, devices as allDevices } from '@/lib/data';
 
 interface AppState {
-  // Navigation
   currentRoom: string | null;
   setCurrentRoom: (room: string | null) => void;
-
-  // Device interaction
   activeDevice: Device | null;
   setActiveDevice: (device: Device | null) => void;
   deviceStates: Record<string, { isOn: boolean; isAnimating: boolean; status: string }>;
   toggleDevice: (deviceId: string) => void;
   triggerAnimation: (deviceId: string) => void;
-
-  // Bundle builder
   bundleItems: string[];
   addToBundle: (deviceId: string) => void;
   removeFromBundle: (deviceId: string) => void;
   clearBundle: () => void;
   getBundleTotal: () => number;
-
-  // UI
   isPanelOpen: boolean;
   setPanelOpen: (open: boolean) => void;
   isNavOpen: boolean;
@@ -43,17 +36,18 @@ export const useAppStore = create<AppState>((set, get) => ({
     return acc;
   }, {} as Record<string, { isOn: boolean; isAnimating: boolean; status: string }>),
 
-  toggleDevice: (deviceId) => set((state) => ({
-    deviceStates: {
-      ...state.deviceStates,
-      [deviceId]: {
-        ...state.deviceStates[deviceId],
-        isOn: !state.deviceStates[deviceId]?.isOn,
-        isAnimating: true,
-        status: !state.deviceStates[deviceId]?.isOn ? 'active' : 'idle',
+  toggleDevice: (deviceId) =>
+    set((state) => ({
+      deviceStates: {
+        ...state.deviceStates,
+        [deviceId]: {
+          ...state.deviceStates[deviceId],
+          isOn: !state.deviceStates[deviceId]?.isOn,
+          isAnimating: true,
+          status: !state.deviceStates[deviceId]?.isOn ? 'active' : 'idle',
+        },
       },
-    },
-  })),
+    })),
 
   triggerAnimation: (deviceId) => {
     set((state) => ({
@@ -73,20 +67,23 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   bundleItems: [],
-  addToBundle: (deviceId) => set((state) => {
-    if (state.bundleItems.includes(deviceId)) return state;
-    const device = allDevices[deviceId];
-    get().setNotification({ message: `${device?.name} added to your bundle!`, type: 'success' });
-    setTimeout(() => get().setNotification(null), 3000);
-    return { bundleItems: [...state.bundleItems, deviceId] };
-  }),
+  addToBundle: (deviceId) =>
+    set((state) => {
+      if (state.bundleItems.includes(deviceId)) {
+        return state;
+      }
+      const item = bundleItemsCatalog[deviceId];
+      get().setNotification({ message: `${item?.name || 'Item'} added to your bundle.`, type: 'success' });
+      setTimeout(() => get().setNotification(null), 3000);
+      return { bundleItems: [...state.bundleItems, deviceId] };
+    }),
   removeFromBundle: (deviceId) => set((state) => ({
     bundleItems: state.bundleItems.filter((id) => id !== deviceId),
   })),
   clearBundle: () => set({ bundleItems: [] }),
   getBundleTotal: () => {
     const { bundleItems } = get();
-    return bundleItems.reduce((total, id) => total + (allDevices[id]?.monthlyPrice || 0), 0);
+    return bundleItems.reduce((total, id) => total + (bundleItemsCatalog[id]?.monthlyPrice || 0), 0);
   },
 
   isPanelOpen: false,
@@ -100,3 +97,4 @@ export const useAppStore = create<AppState>((set, get) => ({
   notification: null,
   setNotification: (n) => set({ notification: n }),
 }));
+

@@ -1,108 +1,90 @@
-'use client';
+﻿'use client';
+
 import { useState } from 'react';
-import { useAppStore } from '@/store/useAppStore';
-import { devices } from '@/lib/data';
-import { ShoppingBag, ChevronUp, ChevronDown, X, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, ChevronDown, ChevronUp, ShoppingBag, X } from 'lucide-react';
+import { bundleItemsCatalog } from '@/lib/data';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function BundleWidget() {
   const { bundleItems, removeFromBundle, getBundleTotal } = useAppStore();
   const [expanded, setExpanded] = useState(false);
 
-  if (bundleItems.length === 0) return null;
+  if (bundleItems.length === 0) {
+    return null;
+  }
 
   const total = getBundleTotal();
 
   return (
-    <div
-      className="fixed bottom-6 right-6 z-40 rounded-2xl overflow-hidden
-                 border border-white/8"
-      style={{
-        background: '#111111',
-        boxShadow: '0 12px 40px rgba(0,0,0,0.55)',
-        minWidth: '260px',
-      }}
-    >
-      {/* Toggle header */}
+    <div className="bundle-widget hidden w-[290px] sm:block">
       <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-4 py-3.5
-                   hover:bg-white/5 transition-colors"
+        onClick={() => setExpanded((open) => !open)}
+        className="flex w-full items-center justify-between gap-3 rounded-[20px] px-3 py-2 text-left text-white transition hover:bg-white/6"
       >
-        <div className="flex items-center gap-2.5">
-          <div className="relative">
-            <ShoppingBag size={16} className="text-[#FFCB00]" />
-            <span
-              className="absolute -top-1.5 -right-1.5 w-4 h-4
-                         bg-[#FFCB00] text-black text-[9px] font-bold
-                         rounded-full flex items-center justify-center"
-            >
+        <div className="flex items-center gap-3">
+          <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/8 text-[#ffcb00]">
+            <ShoppingBag size={17} />
+            <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#ffcb00] px-1 text-[10px] font-bold text-black">
               {bundleItems.length}
             </span>
           </div>
-          <span className="text-white font-bold text-sm">My Bundle</span>
+          <div>
+            <p className="text-sm font-bold">Your Bundle</p>
+            <p className="text-xs text-white/45">{bundleItems.length} selections ready</p>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-[#FFCB00] font-bold text-sm">
-            ₦{total.toLocaleString()}/mo
-          </span>
-          {expanded
-            ? <ChevronDown size={14} className="text-white/30" />
-            : <ChevronUp   size={14} className="text-white/30" />
-          }
+
+        <div className="text-right">
+          <p className="text-sm font-bold text-[#ffcb00]">N{total.toLocaleString()}</p>
+          <p className="text-[11px] text-white/42">per month</p>
         </div>
+
+        {expanded ? <ChevronDown size={16} className="text-white/45" /> : <ChevronUp size={16} className="text-white/45" />}
       </button>
 
-      {/* Expanded list */}
       <AnimatePresence>
         {expanded && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="border-t border-white/8 px-4 py-3 space-y-2 max-h-52 overflow-y-auto scrollbar-hide">
+            <div className="mt-2 space-y-2 border-t border-white/8 px-2 pt-3">
               {bundleItems.map((id) => {
-                const d = devices[id];
-                if (!d) return null;
+                const device = bundleItemsCatalog[id];
+                if (!device) {
+                  return null;
+                }
+
                 return (
-                  <div key={id} className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[16px] shrink-0">{d.icon}</span>
-                      <span className="text-white/75 text-xs font-medium truncate">{d.name}</span>
+                  <div key={id} className="flex items-center justify-between gap-3 rounded-2xl bg-white/6 px-3 py-2.5 text-white">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold">{device.name}</p>
+                      <p className="text-xs text-white/45">N{device.monthlyPrice.toLocaleString()} / month</p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-white/40 text-[11px]">₦{d.monthlyPrice.toLocaleString()}</span>
-                      <button
-                        onClick={() => removeFromBundle(id)}
-                        className="text-white/25 hover:text-red-400 transition-colors"
-                        aria-label={`Remove ${d.name}`}
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => removeFromBundle(id)}
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/8 text-white/50 transition hover:bg-white/12 hover:text-red-300"
+                      aria-label={`Remove ${device.name}`}
+                    >
+                      <X size={13} />
+                    </button>
                   </div>
                 );
               })}
             </div>
-            <div className="px-4 pb-4">
-              <Link
-                href="/bundles"
-                className="flex items-center justify-between w-full
-                           bg-[#FFCB00] text-black text-xs font-bold
-                           px-4 py-2.5 rounded-xl hover:bg-yellow-300
-                           transition-colors"
-              >
-                Review Bundle
-                <ArrowRight size={13} />
-              </Link>
-            </div>
+
+            <Link href="/bundles" className="btn-primary mt-3 w-full justify-between rounded-[20px] px-4">
+              Review bundle
+              <ArrowRight size={15} />
+            </Link>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   );
 }
+

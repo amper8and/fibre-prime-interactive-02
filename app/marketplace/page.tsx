@@ -1,242 +1,227 @@
-'use client';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { marketplaceServices, ContentService } from '@/lib/data';
-import { useAppStore } from '@/store/useAppStore';
+﻿'use client';
+
+import { useMemo, useState } from 'react';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Check, Filter, Search, ShoppingBag, Sparkles, Store } from 'lucide-react';
 import Navigation from '@/components/ui/Navigation';
 import NotificationToast from '@/components/ui/NotificationToast';
-import { Store, Plus, Check, Search, ShoppingBag, X } from 'lucide-react';
-import Link from 'next/link';
+import SiteFooter from '@/components/ui/SiteFooter';
+import { marketplaceServices, type ContentService } from '@/lib/data';
+import { useAppStore } from '@/store/useAppStore';
 
 type Category = 'all' | ContentService['category'];
 
-const categories: { id: Category; label: string; icon: string }[] = [
-  { id: 'all',          label: 'All',           icon: '🌐' },
-  { id: 'device',       label: 'Devices',       icon: '📱' },
-  { id: 'content',      label: 'Content',       icon: '🎬' },
-  { id: 'home-service', label: 'Home Services', icon: '🏠' },
-  { id: 'lifestyle',    label: 'Lifestyle',     icon: '✨' },
+const categories: Array<{
+  id: Category;
+  label: string;
+  headline: string;
+  copy: string;
+  tiles: string[];
+}> = [
+  {
+    id: 'device',
+    label: 'Devices',
+    headline: 'Connected hardware',
+    copy: 'Discover premium routers, screens, smart speakers and control devices for the Fibre Prime home.',
+    tiles: ['Smart TV', 'Speaker', 'Camera', 'Router'],
+  },
+  {
+    id: 'content',
+    label: 'Content',
+    headline: 'Entertainment partners',
+    copy: 'Bundle the streaming and audio services that make each room immediately useful.',
+    tiles: ['Netflix', 'Prime', 'Disney+', 'Music'],
+  },
+  {
+    id: 'home-service',
+    label: 'Home Services',
+    headline: 'Household services',
+    copy: 'Layer in maintenance, energy and security services that extend the platform beyond devices.',
+    tiles: ['Security', 'Cleaning', 'Solar', 'Support'],
+  },
+  {
+    id: 'lifestyle',
+    label: 'Lifestyle',
+    headline: 'Everyday convenience',
+    copy: 'Add meal kits, wellness and other lifestyle subscriptions to round out the home experience.',
+    tiles: ['Meals', 'Wellness', 'Fitness', 'Delivery'],
+  },
 ];
 
+const partnerStrip = ['Samsung', 'Apple', 'Google', 'DSTV', 'Netflix', 'Spotify'];
+
 export default function MarketplacePage() {
-  const [activeCategory, setActiveCategory] = useState<Category>('all');
+  const [activeCategory, setActiveCategory] = useState<Category>('device');
   const [search, setSearch] = useState('');
   const { bundleItems, addToBundle, removeFromBundle } = useAppStore();
 
-  const filtered = marketplaceServices.filter((s) => {
-    const matchCat    = activeCategory === 'all' || s.category === activeCategory;
-    const matchSearch = search === '' ||
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.description.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
-
-  const getCategoryCount = (catId: Category) =>
-    catId === 'all'
-      ? marketplaceServices.length
-      : marketplaceServices.filter((s) => s.category === catId).length;
+  const filtered = useMemo(() => {
+    return marketplaceServices.filter((service) => {
+      const matchesCategory = activeCategory === 'all' ? true : service.category === activeCategory;
+      const query = search.trim().toLowerCase();
+      const matchesSearch = !query
+        ? true
+        : service.name.toLowerCase().includes(query) || service.description.toLowerCase().includes(query);
+      return matchesCategory && matchesSearch;
+    });
+  }, [activeCategory, search]);
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5]">
+    <div className="min-h-screen">
       <Navigation />
       <NotificationToast />
 
-      {/* ── Header ── */}
-      <div className="pt-[var(--nav-height)] bg-black">
-        <div className="page-container py-10">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-[#FFCB00]/15 border border-[#FFCB00]/30
-                            rounded-xl flex items-center justify-center">
-              <Store size={20} className="text-[#FFCB00]" />
-            </div>
-            <div>
-              <h1 className="text-[28px] sm:text-[32px] font-bold text-white leading-tight">
-                Fibre Prime Marketplace
-              </h1>
-              <p className="text-white/40 text-sm mt-0.5">
-                Devices, content, home services and lifestyle — all in one place.
-              </p>
+      <main className="pt-[calc(var(--nav-height)+0.75rem)]">
+        <section className="page-container pb-12">
+          <div className="glass-panel p-5 sm:p-6">
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+              <div>
+                <p className="section-label">Marketplace</p>
+                <h1 className="text-page mt-3 text-black">Fibre Prime Marketplace</h1>
+                <p className="mt-3 max-w-2xl text-base leading-relaxed text-black/60">
+                  Discover devices, entertainment and services curated for a premium connected-home experience.
+                </p>
+              </div>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <label className="relative block min-w-[280px]">
+                  <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-black/35" />
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    className="fp-input pl-11"
+                    placeholder="Search devices and services"
+                  />
+                </label>
+                <button className="btn-secondary">
+                  <Filter size={16} />
+                  Filter view
+                </button>
+              </div>
             </div>
           </div>
+        </section>
 
-          {/* Search bar */}
-          <div className="relative max-w-lg mt-6">
-            <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
-            <input
-              type="search"
-              placeholder="Search devices, services..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="fp-input-dark pl-11 pr-11"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2
-                           text-white/30 hover:text-white transition-colors"
-                aria-label="Clear search"
-              >
-                <X size={15} />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="page-container py-8">
-        {/* ── Category tabs ── */}
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-7 scrollbar-hide">
-          {categories.map((cat) => {
-            const count    = getCategoryCount(cat.id);
-            const isActive = activeCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl
-                           font-semibold text-sm whitespace-nowrap
-                           transition-all duration-200 min-h-[42px] ${
-                  isActive
-                    ? 'bg-black text-white shadow-sm'
-                    : 'bg-white border border-[#E5E5E5] text-[#555] hover:border-[#CCC]'
-                }`}
-              >
-                <span className="text-base leading-none">{cat.icon}</span>
-                {cat.label}
-                <span
-                  className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${
-                    isActive
-                      ? 'bg-[#FFCB00] text-black'
-                      : 'bg-[#F0F0F0] text-[#888]'
-                  }`}
+        <section className="page-container pb-10">
+          <div className="grid gap-5 lg:grid-cols-2">
+            {categories.map((category, index) => {
+              const selected = activeCategory === category.id;
+              return (
+                <motion.button
+                  key={category.id}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: index * 0.05 }}
+                  onClick={() => setActiveCategory(category.id)}
+                  className={`fp-card-hover overflow-hidden p-6 text-left ${selected ? 'gold-outline' : ''}`}
                 >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ── Meta row ── */}
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-[#888] text-sm">
-            {search
-              ? `${filtered.length} results for "${search}"`
-              : `${filtered.length} services available`}
-          </p>
-          {bundleItems.length > 0 && (
-            <Link
-              href="/bundles"
-              className="flex items-center gap-2 bg-[#FFCB00] text-black
-                         text-sm font-bold px-4 py-2 rounded-xl hover:bg-yellow-300
-                         transition-colors"
-            >
-              <ShoppingBag size={15} />
-              {bundleItems.length} in bundle
-            </Link>
-          )}
-        </div>
-
-        {/* ── Products grid ── */}
-        {filtered.length === 0 ? (
-          <div className="text-center py-24">
-            <span className="text-5xl block mb-4">🔍</span>
-            <p className="text-[#555] font-semibold">No results for &ldquo;{search}&rdquo;</p>
-            <button
-              onClick={() => { setSearch(''); setActiveCategory('all'); }}
-              className="mt-4 text-sm text-[#888] hover:text-black transition-colors underline"
-            >
-              Clear filters
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <AnimatePresence mode="popLayout">
-              {filtered.map((service, i) => {
-                const inBundle = bundleItems.includes(service.id);
-                return (
-                  <motion.div
-                    key={service.id}
-                    layout
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.96 }}
-                    transition={{ delay: Math.min(i * 0.04, 0.35), duration: 0.35 }}
-                    className={`fp-card group hover:-translate-y-1
-                               hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]
-                               transition-all duration-200 overflow-hidden ${
-                      inBundle ? 'ring-2 ring-[#FFCB00]/60' : ''
-                    }`}
-                  >
-                    {/* Color accent bar */}
-                    <div className="h-1" style={{ backgroundColor: service.color }} />
-
-                    <div className="p-5">
-                      {/* Icon + partner */}
-                      <div className="flex items-start justify-between mb-4">
-                        <div
-                          className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
-                          style={{
-                            backgroundColor: `${service.color}18`,
-                            border: `1px solid ${service.color}30`,
-                          }}
-                        >
-                          {service.icon}
-                        </div>
-                        {service.partner && (
-                          <span className="text-[10px] text-[#888] font-semibold
-                                           bg-[#F5F5F5] border border-[#E5E5E5]
-                                           px-2 py-0.5 rounded-full">
-                            {service.partner}
-                          </span>
-                        )}
+                  <div className="grid gap-6 md:grid-cols-[0.9fr_1.1fr] md:items-center">
+                    <div>
+                      <div className="inline-flex h-14 w-14 items-center justify-center rounded-[20px] bg-[#ffcb00] text-black">
+                        <Store size={22} />
                       </div>
-
-                      {/* Name + desc */}
-                      <h3 className="font-bold text-black text-[14px] mb-1 leading-snug">
-                        {service.name}
-                      </h3>
-                      <p className="text-[#888] text-xs leading-relaxed mb-4 line-clamp-2">
-                        {service.description}
-                      </p>
-
-                      {/* Price + add */}
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="text-[18px] font-bold text-black">
-                            ₦{service.monthlyPrice.toLocaleString()}
-                          </span>
-                          <span className="text-xs text-[#AAA]">/mo</span>
-                        </div>
-                        <button
-                          onClick={() => inBundle ? removeFromBundle(service.id) : addToBundle(service.id)}
-                          className={`w-9 h-9 rounded-full flex items-center justify-center
-                                     transition-all active:scale-95 ${
-                            inBundle
-                              ? 'bg-[#FFCB00] text-black'
-                              : 'bg-[#F5F5F5] border border-[#E5E5E5] hover:bg-[#FFCB00] hover:border-[#FFCB00]'
-                          }`}
-                          aria-label={inBundle ? `Remove ${service.name}` : `Add ${service.name}`}
-                        >
-                          {inBundle ? <Check size={14} /> : <Plus size={14} />}
-                        </button>
-                      </div>
-
-                      {/* Category */}
-                      <div className="mt-4 pt-3 border-t border-[#F0F0F0]">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-[#AAA]">
-                          {categories.find((c) => c.id === service.category)?.icon}{' '}
-                          {service.category.replace('-', ' ')}
-                        </span>
-                      </div>
+                      <p className="mt-5 text-[2rem] font-bold leading-none tracking-[-0.05em] text-black">{category.label}</p>
+                      <p className="mt-2 text-sm font-semibold text-black/68">{category.headline}</p>
+                      <p className="mt-3 text-sm leading-relaxed text-black/58">{category.copy}</p>
                     </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+                    <div className="grid grid-cols-2 gap-3">
+                      {category.tiles.map((tile) => (
+                        <div key={tile} className="rounded-[20px] border border-black/8 bg-[#f7f4ee] px-4 py-5 text-center text-sm font-bold text-black">
+                          {tile}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.button>
+              );
+            })}
           </div>
-        )}
-      </div>
+
+          <div className="mt-10 rounded-[26px] border border-black/8 bg-white/74 px-5 py-4 backdrop-blur-sm">
+            <p className="text-center text-sm font-semibold uppercase tracking-[0.22em] text-black/36">Featured partners</p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-6 text-2xl font-bold tracking-[-0.04em] text-black/28 sm:text-3xl">
+              {partnerStrip.map((partner) => (
+                <span key={partner}>{partner}</span>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="page-container pb-16">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="section-label">Catalog</p>
+              <h2 className="section-title mt-2 text-black">{filtered.length} items ready to bundle</h2>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button onClick={() => setActiveCategory('all')} className={`rounded-full px-4 py-2 text-sm font-semibold transition ${activeCategory === 'all' ? 'bg-black text-white' : 'border border-black/10 bg-white text-black/66'}`}>
+                All
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setActiveCategory(category.id)}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${activeCategory === category.id ? 'bg-black text-white' : 'border border-black/10 bg-white text-black/66'}`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {filtered.map((service, index) => {
+              const inBundle = bundleItems.includes(service.id);
+              return (
+                <motion.article
+                  key={service.id}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: Math.min(index * 0.04, 0.24) }}
+                  className="fp-card-hover overflow-hidden p-5"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl text-xl" style={{ backgroundColor: `${service.color}1a` }}>
+                      {service.icon}
+                    </div>
+                    <span className="rounded-full bg-black/5 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-black/46">
+                      {service.category.replace('-', ' ')}
+                    </span>
+                  </div>
+                  <h3 className="mt-5 text-[1.45rem] font-bold leading-none tracking-[-0.04em] text-black">{service.name}</h3>
+                  <p className="mt-3 min-h-[72px] text-sm leading-relaxed text-black/58">{service.description}</p>
+                  <div className="mt-5 flex items-center justify-between border-t border-black/8 pt-4">
+                    <div>
+                      <p className="text-lg font-bold text-black">N{service.monthlyPrice.toLocaleString()}</p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-black/40">Monthly</p>
+                    </div>
+                    <button
+                      onClick={() => (inBundle ? removeFromBundle(service.id) : addToBundle(service.id))}
+                      className={`inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-bold transition ${inBundle ? 'bg-black text-white' : 'bg-[#ffcb00] text-black'}`}
+                    >
+                      {inBundle ? <Check size={15} /> : <ShoppingBag size={15} />}
+                      {inBundle ? 'Added' : 'Add'}
+                    </button>
+                  </div>
+                </motion.article>
+              );
+            })}
+          </div>
+
+          {bundleItems.length > 0 && (
+            <div className="mt-8 flex justify-center">
+              <Link href="/bundles" className="btn-primary px-7">
+                <ShoppingBag size={16} />
+                Review {bundleItems.length} bundle items
+              </Link>
+            </div>
+          )}
+        </section>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }
+

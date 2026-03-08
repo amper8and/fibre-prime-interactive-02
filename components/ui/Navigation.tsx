@@ -1,15 +1,17 @@
-'use client';
+﻿'use client';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Menu, ShoppingBag, Wifi, X } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
-import { Menu, X, ShoppingBag, ChevronRight, Wifi } from 'lucide-react';
+import BrandMark from '@/components/ui/BrandMark';
 
 const navLinks = [
-  { href: '/experience',  label: 'Home Experience' },
-  { href: '/marketplace', label: 'Marketplace' },
-  { href: '/bundles',     label: 'Bundles' },
-  { href: '/plans',       label: 'Fibre Plans' },
+  { href: '/experience', label: 'Home Experience' },
+  { href: '/marketplace', label: 'Devices' },
+  { href: '/bundles', label: 'Bundles' },
+  { href: '/plans', label: 'Fibre Plans' },
 ];
 
 export default function Navigation() {
@@ -19,156 +21,95 @@ export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close mobile menu on route change
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '?');
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}?`);
 
   return (
     <>
-      {/* ── Main navbar ── */}
       <nav
-        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'bg-black/95 backdrop-blur-md border-b border-white/8 shadow-[0_4px_24px_rgba(0,0,0,0.4)]'
-            : 'bg-black border-b border-white/10'
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+          scrolled ? 'border-b border-black/8 bg-[rgba(250,248,243,0.86)] shadow-[0_16px_44px_rgba(5,5,5,0.08)] backdrop-blur-xl' : 'bg-transparent'
         }`}
         style={{ height: 'var(--nav-height)' }}
       >
-        <div className="page-container h-full flex items-center justify-between gap-4">
-
-          {/* ── Logo ── */}
-          <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            {/* MTN yellow badge */}
-            <div
-              className="w-9 h-9 rounded-lg flex items-center justify-center
-                         font-bold text-[11px] text-black leading-none
-                         bg-[#FFCB00] group-hover:scale-105 transition-transform duration-200"
-              aria-label="MTN"
-            >
-              MTN
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-white font-bold text-[14px] leading-tight">Fibre Prime</p>
-              <p className="text-white/35 text-[10px] font-light leading-tight tracking-wide">
-                Interactive Home
-              </p>
-            </div>
+        <div className="page-container flex h-full items-center justify-between gap-4">
+          <Link href="/" className="shrink-0">
+            <BrandMark compact />
           </Link>
 
-          {/* ── Desktop nav links ── */}
-          <div className="hidden lg:flex items-center">
-            {navLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`nav-link ${isActive(href) ? 'active' : ''}`}
-              >
-                {label}
+          <div className="hidden items-center gap-1 lg:flex">
+            {navLinks.map((link) => (
+              <Link key={link.href} href={link.href} className={`nav-link ${isActive(link.href) ? 'active' : ''}`}>
+                {link.label}
               </Link>
             ))}
           </div>
 
-          {/* ── Right actions ── */}
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Bundle cart */}
+          <div className="flex items-center gap-2">
             <Link
               href="/bundles"
-              className="relative flex items-center gap-2 h-11 px-3
-                         text-sm font-semibold text-white/70
-                         hover:text-white rounded-xl
-                         hover:bg-white/6
-                         transition-all duration-200 min-w-[44px] justify-center"
-              aria-label={`My Bundle — ${bundleItems.length} items`}
+              className="relative inline-flex h-11 items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 text-sm font-semibold text-black/72 backdrop-blur-md transition hover:bg-white"
+              aria-label={`Bundle with ${bundleItems.length} items`}
             >
-              <ShoppingBag size={18} />
-              <span className="hidden sm:inline text-sm">Bundle</span>
+              <ShoppingBag size={16} />
+              <span className="hidden sm:inline">Bundle</span>
               {bundleItems.length > 0 && (
-                <span
-                  className="absolute -top-0.5 -right-0.5 w-5 h-5
-                             bg-[#FFCB00] text-black text-[10px] font-bold
-                             rounded-full flex items-center justify-center"
-                >
+                <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#ffcb00] px-1 text-[10px] font-bold text-black">
                   {bundleItems.length}
                 </span>
               )}
             </Link>
 
-            {/* Primary CTA */}
-            <Link
-              href="/plans"
-              className="hidden sm:flex btn-primary text-[13px] px-4 py-2 rounded-xl gap-1.5"
-            >
-              <Wifi size={14} />
+            <Link href="/plans" className="hidden sm:inline-flex btn-primary px-5">
+              <Wifi size={16} />
               Get Connected
             </Link>
 
-            {/* Mobile hamburger */}
             <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden btn-icon text-white hover:bg-white/8"
+              onClick={() => setMobileOpen((open) => !open)}
+              className="btn-icon lg:hidden"
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             >
-              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>
       </nav>
 
-      {/* ── Mobile drawer ── */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden animate-fade-in">
-          {/* Overlay */}
-          <div
-            className="absolute inset-0 bg-black/65 backdrop-blur-sm"
-            onClick={() => setMobileOpen(false)}
-          />
-          {/* Drawer */}
-          <div
-            className="absolute top-[var(--nav-height)] left-0 right-0
-                       bg-[#111111] border-b border-white/8
-                       shadow-[0_8px_32px_rgba(0,0,0,0.5)]
-                       animate-scale-in origin-top"
-          >
-            <div className="page-container py-5 space-y-1">
-              {navLinks.map(({ href, label }) => (
+          <button className="absolute inset-0 bg-black/28" onClick={() => setMobileOpen(false)} aria-label="Close menu" />
+          <div className="absolute left-5 right-5 top-[calc(var(--nav-height)+12px)] glass-panel p-4">
+            <div className="space-y-1">
+              {navLinks.map((link) => (
                 <Link
-                  key={href}
-                  href={href}
-                  className={`flex items-center justify-between
-                             px-4 py-3.5 rounded-xl min-h-[52px]
-                             text-sm font-semibold
-                             transition-all duration-150 ${
-                    isActive(href)
-                      ? 'text-[#FFCB00] bg-[#FFCB00]/8'
-                      : 'text-white/70 hover:text-white hover:bg-white/6'
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                    isActive(link.href) ? 'bg-black text-white' : 'text-black/70 hover:bg-black/4 hover:text-black'
                   }`}
                 >
-                  {label}
-                  <ChevronRight
-                    size={16}
-                    className={isActive(href) ? 'text-[#FFCB00] opacity-70' : 'opacity-30'}
-                  />
+                  {link.label}
+                  <span className="text-xs uppercase tracking-[0.18em] opacity-60">Go</span>
                 </Link>
               ))}
-              <div className="pt-3 border-t border-white/8">
-                <Link
-                  href="/plans"
-                  className="btn-primary w-full text-sm rounded-xl"
-                >
-                  <Wifi size={16} />
-                  Get Connected
-                </Link>
-              </div>
             </div>
+            <Link href="/plans" className="btn-primary mt-4 w-full justify-center">
+              <Wifi size={16} />
+              Get Connected
+            </Link>
           </div>
         </div>
       )}
     </>
   );
 }
+

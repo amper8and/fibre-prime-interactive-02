@@ -1,4 +1,4 @@
-// MTN Fibre Prime - All device and room data
+﻿// MTN Fibre Prime - All device and room data
 export type DeviceStatus = 'active' | 'idle' | 'offline' | 'streaming' | 'charging';
 
 export interface Device {
@@ -497,3 +497,12 @@ export const fibrePlans = [
   { id: 'premium', name: 'Fibre 500', speed: '500 Mbps', price: 35000, features: ['Unlimited Data', 'Free Wi-Fi 6 Router', 'Priority Support', 'Static IP', 'SLA Guarantee'], highlighted: true },
   { id: 'ultra', name: 'Fibre 1000', speed: '1 Gbps', price: 55000, features: ['Unlimited Data', 'Free Wi-Fi 6E Router', 'Dedicated Support', 'Static IP', 'SLA Guarantee', 'Business Ready'] },
 ];
+
+export const marketplaceServicesById = Object.fromEntries(
+  marketplaceServices.map((service) => [service.id, service])
+) as Record<string, ContentService>;
+
+export const bundleItemsCatalog = {
+  ...devices,
+  ...marketplaceServicesById,
+};
