@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   authors: [{ name: 'MTN Nigeria' }],
   manifest: '/manifest.json',
   icons: {
-    icon: '/favicon.ico',
-    apple: '/icons/icon-192.png',
+    icon: '/favicon.svg',
+    apple: '/icons/icon-192.svg',
   },
   openGraph: {
     title: 'MTN Fibre Prime | Interactive Home Experience',
