@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production';
+const repoName = '/fibre-prime-interactive-02';
+
 const nextConfig = {
   output: 'export',
   trailingSlash: true,
@@ -6,9 +9,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Set basePath to repo name for GitHub Pages
-  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
-  assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || '',
+  // Always use the repo name as basePath for GitHub Pages
+  basePath: repoName,
+  assetPrefix: repoName,
   webpack: (config) => {
     config.externals = [...(config.externals || [])];
     return config;
