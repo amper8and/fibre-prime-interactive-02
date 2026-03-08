@@ -6,21 +6,55 @@ import { rooms, devices } from '@/lib/data';
 import { useAppStore } from '@/store/useAppStore';
 import Navigation from '@/components/ui/Navigation';
 import NotificationToast from '@/components/ui/NotificationToast';
-import RoomCard from '@/components/rooms/RoomCard';
 import DevicePanel from '@/components/device-panels/DevicePanel';
 import RoomView from '@/components/rooms/RoomView';
-import { Grid, List, Sun, Sunset, Moon, ShoppingCart } from 'lucide-react';
+import { Sun, Sunset, Moon, ShoppingBag, ArrowLeft, Grid3X3, LayoutGrid } from 'lucide-react';
 import Link from 'next/link';
 
-type ViewMode = 'grid' | 'home';
+type Scene = 'day' | 'evening' | 'night';
+
+const sceneConfig: Record<Scene, { label: string; icon: React.FC<{ size?: number; className?: string }>; filter: string; bg: string; accent: string }> = {
+  day: {
+    label: 'Day',
+    icon: Sun,
+    filter: 'none',
+    bg: '#F0F7FF',
+    accent: '#3B82F6',
+  },
+  evening: {
+    label: 'Evening',
+    icon: Sunset,
+    filter: 'sepia(0.22) saturate(1.15) brightness(0.88)',
+    bg: '#1A0A00',
+    accent: '#F97316',
+  },
+  night: {
+    label: 'Night',
+    icon: Moon,
+    filter: 'saturate(0.5) brightness(0.50) hue-rotate(215deg)',
+    bg: '#0A0A1A',
+    accent: '#818CF8',
+  },
+};
+
+/* ── Room layout for the floor plan ── */
+const roomLayout = [
+  { id: 'living-room',    label: 'Living Room',   icon: '🛋️', col: '1 / 3', row: '2 / 3', color: '#FFFBEB', border: '#FCD34D' },
+  { id: 'kitchen',        label: 'Kitchen',        icon: '🍳', col: '1 / 2', row: '1 / 2', color: '#ECFDF5', border: '#34D399' },
+  { id: 'home-office',    label: 'Home Office',    icon: '💼', col: '2 / 3', row: '1 / 2', color: '#EFF6FF', border: '#60A5FA' },
+  { id: 'master-bedroom', label: 'Master Bed',     icon: '🛏️', col: '3 / 4', row: '1 / 2', color: '#F5F3FF', border: '#A78BFA' },
+  { id: 'kids-bedroom',   label: 'Kids Room',      icon: '🧸', col: '3 / 4', row: '2 / 3', color: '#FFF1F2', border: '#FB7185' },
+  { id: 'patio',          label: 'Patio',          icon: '🌿', col: '2 / 3', row: '2 / 3', color: '#F0FDFA', border: '#2DD4BF' },
+  { id: 'garage',         label: 'Garage',         icon: '🚗', col: '1 / 2', row: '3 / 4', color: '#F8FAFC', border: '#94A3B8' },
+  { id: '_placeholder',   label: '',               icon: '',   col: '2 / 4', row: '3 / 4', color: '#FAFAFA', border: '#E5E5E5' },
+];
 
 export default function ExperienceClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { currentRoom, setCurrentRoom, currentScene, setScene, bundleItems } = useAppStore();
-  const [viewMode, setViewMode] = useState<ViewMode>('home');
+  const [viewMode, setViewMode] = useState<'floor' | 'grid'>('floor');
 
-  // Handle deep-link to a room
   useEffect(() => {
     const roomParam = searchParams.get('room');
     if (roomParam && rooms[roomParam]) {
@@ -33,94 +67,116 @@ export default function ExperienceClient() {
     router.push(`/experience?room=${roomId}`, { scroll: false });
   };
 
-  const handleBackToHome = () => {
+  const handleBack = () => {
     setCurrentRoom(null);
     router.push('/experience', { scroll: false });
   };
 
-  const sceneConfig = {
-    day: { label: 'Day', icon: Sun, bg: 'from-sky-400 via-blue-300 to-indigo-200', filter: 'none' },
-    evening: { label: 'Evening', icon: Sunset, bg: 'from-orange-400 via-rose-400 to-purple-500', filter: 'sepia(0.3) saturate(1.2) brightness(0.85)' },
-    night: { label: 'Night', icon: Moon, bg: 'from-indigo-900 via-blue-900 to-gray-900', filter: 'sepia(0.2) saturate(0.7) brightness(0.55) hue-rotate(220deg)' },
-  };
-
-  const scene = sceneConfig[currentScene];
+  const scene = sceneConfig[currentScene as Scene] || sceneConfig.day;
 
   return (
-    <div className="min-h-screen bg-mtn-bg font-mtn">
+    <div className="min-h-screen bg-[#F5F5F5]">
       <Navigation />
       <NotificationToast />
       <DevicePanel />
 
-      {/* Page header */}
-      <div className={`pt-20 bg-gradient-to-r ${scene.bg} transition-all duration-1000`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      {/* ── Page header ── */}
+      <div
+        className="pt-[var(--nav-height)] transition-colors duration-700"
+        style={{ background: currentRoom ? '#000000' : '#000000' }}
+      >
+        <div className="page-container py-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {/* Breadcrumb / title */}
             <div>
-              {currentRoom ? (
+              {currentRoom && (
                 <button
-                  onClick={handleBackToHome}
-                  className="text-white/70 text-sm mb-2 hover:text-white flex items-center gap-1 transition-colors"
+                  onClick={handleBack}
+                  className="flex items-center gap-1.5 text-white/50 hover:text-white
+                             text-sm mb-2 transition-colors duration-150 group"
                 >
-                  ← Back to Home
+                  <ArrowLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
+                  Back to Home
                 </button>
-              ) : null}
-              <h1 className="text-2xl sm:text-3xl font-bold text-white drop-shadow">
-                {currentRoom ? rooms[currentRoom]?.name : '🏠 The Connected Lagos Home'}
-              </h1>
-              <p className="text-white/80 text-sm mt-1">
-                {currentRoom
-                  ? rooms[currentRoom]?.theme
-                  : 'Explore every room powered by MTN Fibre Prime'}
-              </p>
+              )}
+              <div className="flex items-center gap-3">
+                {!currentRoom && (
+                  <div className="w-8 h-8 bg-[#FFCB00] rounded-lg flex items-center justify-center
+                                  font-bold text-[11px] text-black shrink-0">
+                    MTN
+                  </div>
+                )}
+                <div>
+                  <h1 className="text-white font-bold text-xl sm:text-2xl leading-tight">
+                    {currentRoom ? rooms[currentRoom]?.name : 'The Connected Lagos Home'}
+                  </h1>
+                  <p className="text-white/40 text-sm mt-0.5">
+                    {currentRoom
+                      ? rooms[currentRoom]?.theme
+                      : '7 rooms · 20+ devices · Powered by MTN Fibre Prime'}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Controls */}
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
               {/* Scene switcher */}
-              <div className="flex items-center bg-white/20 backdrop-blur rounded-xl p-1 gap-1">
-                {(Object.keys(sceneConfig) as Array<keyof typeof sceneConfig>).map((s) => {
+              <div className="flex items-center bg-white/6 backdrop-blur rounded-xl p-1 gap-0.5">
+                {(Object.keys(sceneConfig) as Scene[]).map((s) => {
                   const Icon = sceneConfig[s].icon;
                   return (
                     <button
                       key={s}
                       onClick={() => setScene(s)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                        currentScene === s ? 'bg-white text-mtn-black shadow' : 'text-white hover:bg-white/20'
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-lg
+                                 text-xs font-semibold min-h-[36px] transition-all duration-150 ${
+                        currentScene === s
+                          ? 'bg-white text-black shadow-sm'
+                          : 'text-white/60 hover:text-white hover:bg-white/8'
                       }`}
                     >
                       <Icon size={13} />
-                      {sceneConfig[s].label}
+                      <span className="hidden sm:inline">{sceneConfig[s].label}</span>
                     </button>
                   );
                 })}
               </div>
 
-              {/* View toggle (only when no room selected) */}
+              {/* View toggle (only on home screen) */}
               {!currentRoom && (
-                <div className="flex bg-white/20 backdrop-blur rounded-xl p-1 gap-1">
-                  <button
-                    onClick={() => setViewMode('home')}
-                    className={`p-2 rounded-lg transition-all ${viewMode === 'home' ? 'bg-white text-mtn-black shadow' : 'text-white hover:bg-white/20'}`}
-                    aria-label="Home view"
-                  >
-                    <Grid size={16} />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-mtn-black shadow' : 'text-white hover:bg-white/20'}`}
-                    aria-label="List view"
-                  >
-                    <List size={16} />
-                  </button>
+                <div className="flex bg-white/6 backdrop-blur rounded-xl p-1 gap-0.5">
+                  {[
+                    { mode: 'floor', icon: Grid3X3, label: 'Floor plan' },
+                    { mode: 'grid',  icon: LayoutGrid, label: 'Grid' },
+                  ].map(({ mode, icon: Icon, label }) => (
+                    <button
+                      key={mode}
+                      onClick={() => setViewMode(mode as 'floor' | 'grid')}
+                      aria-label={label}
+                      className={`w-9 h-9 flex items-center justify-center rounded-lg
+                                 transition-all duration-150 ${
+                        viewMode === mode
+                          ? 'bg-white text-black shadow-sm'
+                          : 'text-white/60 hover:text-white hover:bg-white/8'
+                      }`}
+                    >
+                      <Icon size={15} />
+                    </button>
+                  ))}
                 </div>
               )}
 
               {/* Bundle indicator */}
               {bundleItems.length > 0 && (
-                <Link href="/bundles" className="flex items-center gap-2 bg-mtn-yellow text-mtn-black text-xs font-bold px-3 py-2 rounded-xl hover:bg-yellow-400 transition-colors">
-                  <ShoppingCart size={14} />
-                  {bundleItems.length} items
+                <Link
+                  href="/bundles"
+                  className="flex items-center gap-2 bg-[#FFCB00] text-black
+                             text-xs font-bold px-3 py-2 rounded-xl
+                             hover:bg-yellow-300 transition-colors min-h-[36px]"
+                >
+                  <ShoppingBag size={14} />
+                  {bundleItems.length} in bundle
                 </Link>
               )}
             </div>
@@ -128,19 +184,43 @@ export default function ExperienceClient() {
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8" style={{ filter: scene.filter, transition: 'filter 1s ease' }}>
+      {/* ── Main content ── */}
+      <div
+        className="page-container py-8"
+        style={{
+          filter: scene.filter,
+          transition: 'filter 0.9s ease',
+        }}
+      >
         <AnimatePresence mode="wait">
           {currentRoom ? (
-            <motion.div key={currentRoom} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
+            <motion.div
+              key={currentRoom}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
               <RoomView roomId={currentRoom} />
             </motion.div>
-          ) : viewMode === 'home' ? (
-            <motion.div key="isometric" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <IsometricHome onRoomClick={handleRoomClick} />
+          ) : viewMode === 'floor' ? (
+            <motion.div
+              key="floor"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <FloorPlan onRoomClick={handleRoomClick} />
             </motion.div>
           ) : (
-            <motion.div key="grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div
+              key="grid"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
               <RoomsGrid onRoomClick={handleRoomClick} />
             </motion.div>
           )}
@@ -150,76 +230,111 @@ export default function ExperienceClient() {
   );
 }
 
-// ─── Isometric Home Visual ────────────────────────────────────────────
-function IsometricHome({ onRoomClick }: { onRoomClick: (id: string) => void }) {
+/* ── Floor Plan ─────────────────────────────────────────────── */
+function FloorPlan({ onRoomClick }: { onRoomClick: (id: string) => void }) {
   const { deviceStates } = useAppStore();
 
-  const roomLayout = [
-    { id: 'living-room', label: 'Living Room', icon: '🛋️', col: 1, row: 2, color: '#FEF3C7', border: '#F59E0B', w: 2, h: 1 },
-    { id: 'kitchen', label: 'Kitchen', icon: '🍳', col: 1, row: 1, color: '#D1FAE5', border: '#10B981', w: 1, h: 1 },
-    { id: 'home-office', label: 'Home Office', icon: '💼', col: 2, row: 1, color: '#DBEAFE', border: '#3B82F6', w: 1, h: 1 },
-    { id: 'master-bedroom', label: 'Master Bed', icon: '🛏️', col: 3, row: 1, color: '#EDE9FE', border: '#8B5CF6', w: 1, h: 1 },
-    { id: 'kids-bedroom', label: 'Kids Room', icon: '🧸', col: 3, row: 2, color: '#FCE7F3', border: '#EC4899', w: 1, h: 1 },
-    { id: 'patio', label: 'Patio', icon: '🌿', col: 2, row: 2, color: '#CCFBF1', border: '#14B8A6', w: 1, h: 1 },
-    { id: 'garage', label: 'Garage', icon: '🚗', col: 1, row: 3, color: '#F1F5F9', border: '#64748B', w: 1, h: 1 },
-  ];
-
   return (
-    <div className="w-full">
+    <div className="max-w-3xl mx-auto">
       {/* Intro */}
-      <div className="text-center mb-8">
-        <p className="text-gray-500 text-sm">Click any room to explore its connected devices and services</p>
-      </div>
+      <p className="text-center text-[#888] text-sm mb-6">
+        Click any room to explore its connected devices and services
+      </p>
 
-      {/* House visual */}
-      <div className="relative max-w-3xl mx-auto">
-        {/* House outline */}
-        <div className="relative bg-white rounded-3xl border-2 border-mtn-grey p-6 shadow-sm overflow-hidden">
-          {/* Roof decoration */}
-          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-mtn-yellow via-yellow-400 to-mtn-yellow rounded-t-3xl" />
+      {/* House card */}
+      <div
+        className="bg-white rounded-2xl border border-[#E5E5E5] overflow-hidden"
+        style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.07)' }}
+      >
+        {/* Yellow top accent */}
+        <div className="h-1.5 bg-[#FFCB00]" />
 
-          {/* Label */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">Floor Plan View</div>
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <span className="w-3 h-3 bg-mtn-yellow rounded-sm" /> Active
-              <span className="w-3 h-3 bg-gray-200 rounded-sm ml-2" /> Idle
+        <div className="p-6">
+          {/* House label */}
+          <div className="flex items-center justify-between mb-5">
+            <span className="text-xs font-bold text-[#888] uppercase tracking-widest">
+              Floor Plan View
+            </span>
+            <div className="flex items-center gap-3 text-[11px] text-[#888]">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 bg-emerald-400 rounded-sm" /> Active
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 bg-gray-200 rounded-sm" /> Idle
+              </span>
             </div>
           </div>
 
           {/* Grid */}
-          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gridTemplateRows: 'repeat(3, auto)' }}>
+          <div
+            className="grid gap-2"
+            style={{
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateRows:    'repeat(3, auto)',
+            }}
+          >
             {roomLayout.map((room) => {
-              const roomDevices = rooms[room.id]?.devices || [];
-              const activeCount = roomDevices.filter((id) => deviceStates[id]?.isOn).length;
-              const deviceList = rooms[room.id]?.devices.slice(0, 2).map((id) => devices[id]?.icon).join(' ') || '';
+              if (room.id === '_placeholder') {
+                return (
+                  <div
+                    key="_placeholder"
+                    style={{
+                      gridColumn: room.col,
+                      gridRow:    room.row,
+                      background: '#FAFAFA',
+                      borderRadius: 12,
+                      border: '1px dashed #E5E5E5',
+                    }}
+                    className="flex items-center justify-center"
+                  >
+                    <div className="text-center">
+                      <div className="text-2xl mb-1">🌿</div>
+                      <span className="text-[10px] text-[#CCC] font-medium">Garden / Outdoor</span>
+                    </div>
+                  </div>
+                );
+              }
+
+              const roomData = rooms[room.id];
+              const deviceCount = roomData?.devices.length || 0;
+              const activeCount = roomData?.devices.filter((id) => deviceStates[id]?.isOn).length || 0;
 
               return (
                 <motion.button
                   key={room.id}
-                  whileHover={{ scale: 1.03, boxShadow: `0 8px 24px ${room.border}40` }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.025, boxShadow: `0 8px 28px ${room.border}35` }}
+                  whileTap={{ scale: 0.975 }}
                   onClick={() => onRoomClick(room.id)}
-                  className="relative rounded-2xl p-4 text-left transition-all border-2 group min-h-[100px] flex flex-col justify-between"
                   style={{
+                    gridColumn: room.col,
+                    gridRow:    room.row,
                     backgroundColor: room.color,
                     borderColor: room.border,
-                    gridColumn: room.id === 'living-room' ? 'span 2' : 'span 1',
                   }}
+                  className="relative rounded-xl border-2 p-4 text-left
+                             transition-shadow group min-h-[100px] flex flex-col justify-between"
                 >
                   <div>
                     <span className="text-2xl">{room.icon}</span>
-                    <p className="font-bold text-sm text-gray-800 mt-1 leading-tight">{room.label}</p>
+                    <p className="font-bold text-sm text-black mt-1.5 leading-tight">{room.label}</p>
                   </div>
                   <div className="flex items-end justify-between mt-2">
-                    <span className="text-lg">{deviceList}</span>
+                    <span className="text-[10px] text-[#888]">{deviceCount} devices</span>
                     <div className="flex items-center gap-1">
-                      <span className={`w-2 h-2 rounded-full ${activeCount > 0 ? 'bg-green-500' : 'bg-gray-400'}`} />
-                      <span className="text-[10px] text-gray-500 font-medium">{activeCount} on</span>
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          activeCount > 0 ? 'bg-emerald-500' : 'bg-gray-300'
+                        }`}
+                      />
+                      <span className="text-[10px] text-[#888]">{activeCount} on</span>
                     </div>
                   </div>
                   {/* Hover arrow */}
-                  <div className="absolute top-2 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold" style={{ color: room.border }}>
+                  <div
+                    className="absolute top-2.5 right-3 text-[10px] font-bold opacity-0
+                               group-hover:opacity-100 transition-opacity duration-200"
+                    style={{ color: room.border }}
+                  >
                     Explore →
                   </div>
                 </motion.button>
@@ -227,52 +342,74 @@ function IsometricHome({ onRoomClick }: { onRoomClick: (id: string) => void }) {
             })}
           </div>
 
-          {/* Bottom bar */}
-          <div className="mt-6 pt-4 border-t border-mtn-grey flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <span className="text-xl">⚡</span>
-              <span className="font-semibold">Powered by MTN Fibre Prime</span>
+          {/* Status bar */}
+          <div className="mt-5 pt-4 border-t border-[#F0F0F0] flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-[#444]">
+              <span className="text-lg">⚡</span>
+              <span className="font-semibold text-[13px]">Powered by MTN Fibre Prime</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs text-gray-500 font-medium">All systems online</span>
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-[11px] text-[#888] font-medium">All systems online</span>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Quick stats below house */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-          {[
-            { label: 'Connected Devices', value: Object.keys(devices).length, icon: '📱' },
-            { label: 'Active Right Now', value: Object.values(deviceStates).filter(d => d.isOn).length, icon: '🟢' },
-            { label: 'Monthly Bundle', value: '₦45,000', icon: '💳' },
-            { label: 'Speed', value: '500 Mbps', icon: '⚡' },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-xl border border-mtn-grey p-3 text-center">
-              <div className="text-xl mb-1">{stat.icon}</div>
-              <div className="font-bold text-mtn-black text-sm">{stat.value}</div>
-              <div className="text-xs text-gray-500">{stat.label}</div>
-            </div>
-          ))}
-        </div>
+      {/* Stats row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+        {[
+          { label: 'Connected Devices', value: Object.keys(devices).length, icon: '📱' },
+          { label: 'Active Now',         value: Object.values(deviceStates).filter(d => d.isOn).length, icon: '🟢' },
+          { label: 'Monthly Bundle',    value: '₦45,000', icon: '💳' },
+          { label: 'Speed',              value: '500 Mbps', icon: '⚡' },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="bg-white rounded-xl border border-[#E5E5E5] p-4 text-center"
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+          >
+            <div className="text-xl mb-1">{stat.icon}</div>
+            <div className="font-bold text-black text-sm">{stat.value}</div>
+            <div className="text-[11px] text-[#888] mt-0.5">{stat.label}</div>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-// ─── Grid View ───────────────────────────────────────────────────────
+/* ── Grid View ──────────────────────────────────────────────── */
 function RoomsGrid({ onRoomClick }: { onRoomClick: (id: string) => void }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {Object.values(rooms).map((room, i) => (
-        <motion.div
+        <motion.button
           key={room.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.07 }}
+          transition={{ delay: i * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          whileHover={{ y: -4 }}
+          onClick={() => onRoomClick(room.id)}
+          className="fp-card text-left p-5 group hover:border-[#FFCB00]/40
+                     hover:shadow-[0_8px_24px_rgba(0,0,0,0.10)]
+                     transition-all duration-200"
         >
-          <RoomCard room={room} onClick={() => onRoomClick(room.id)} />
-        </motion.div>
+          <span className="text-4xl block mb-4 group-hover:scale-110 transition-transform duration-200">
+            {room.icon}
+          </span>
+          <p className="font-bold text-black text-[15px] mb-0.5">{room.name}</p>
+          <p className="text-[#888] text-xs mb-3">{room.theme}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-[#AAA]">{room.devices.length} devices</span>
+            <span
+              className="text-[11px] font-bold text-[#FFCB00]
+                         opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >
+              Explore →
+            </span>
+          </div>
+        </motion.button>
       ))}
     </div>
   );

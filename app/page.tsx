@@ -1,374 +1,473 @@
 'use client';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Wifi, Zap, Shield, Star, ChevronDown, Play, Check } from 'lucide-react';
+import { ArrowRight, Wifi, Play, Check, ChevronDown, Zap, Shield, Clock, Home } from 'lucide-react';
 import Navigation from '@/components/ui/Navigation';
 import NotificationToast from '@/components/ui/NotificationToast';
+import BundleWidget from '@/components/ui/BundleWidget';
+
+/* ── Fade helpers ─────────────────────────────────── */
+const FadeUp = ({ children, delay = 0, className = '' }: {
+  children: React.ReactNode; delay?: number; className?: string;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 28 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+    className={className}
+  >
+    {children}
+  </motion.div>
+);
+
+const InView = ({ children, delay = 0, className = '' }: {
+  children: React.ReactNode; delay?: number; className?: string;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 32 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: '-50px' }}
+    transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+    className={className}
+  >
+    {children}
+  </motion.div>
+);
+
+/* ── Data ─────────────────────────────────────────── */
+const rooms = [
+  { id: 'living-room',    icon: '🛋️', name: 'Living Room',    theme: 'Entertainment Hub',     devices: 5 },
+  { id: 'master-bedroom', icon: '🛏️', name: 'Master Bedroom', theme: 'Sleep & Comfort',       devices: 3 },
+  { id: 'kitchen',        icon: '🍳', name: 'Kitchen',         theme: 'Smart Convenience',     devices: 2 },
+  { id: 'home-office',    icon: '💼', name: 'Home Office',     theme: 'Productivity',          devices: 2 },
+  { id: 'kids-bedroom',   icon: '🧸', name: 'Kids Bedroom',    theme: 'Safety + Fun',          devices: 3 },
+  { id: 'patio',          icon: '🌿', name: 'Patio',           theme: 'Outdoor Living',        devices: 2 },
+  { id: 'garage',         icon: '🚗', name: 'Garage',          theme: 'Green Technology',      devices: 2 },
+];
 
 const stats = [
-  { value: '1 Gbps', label: 'Max Speed', icon: '⚡' },
-  { value: '99.9%', label: 'Uptime SLA', icon: '🛡️' },
-  { value: '7+', label: 'Connected Rooms', icon: '🏠' },
-  { value: '20+', label: 'Smart Devices', icon: '📱' },
+  { value: '1 Gbps',  label: 'Max Speed' },
+  { value: '99.9%',   label: 'Uptime SLA' },
+  { value: '7',       label: 'Connected Rooms' },
+  { value: '20+',     label: 'Smart Devices' },
 ];
 
 const features = [
-  { icon: '📺', title: 'Entertainment', desc: 'Stream Netflix, Showmax, DSTV in 4K with zero buffering.' },
-  { icon: '🎮', title: 'Gaming', desc: 'Low-latency gaming with <5ms ping for competitive play.' },
-  { icon: '💼', title: 'Work From Home', desc: 'HD video calls and fast uploads for productivity.' },
-  { icon: '🏠', title: 'Smart Home', desc: 'Control lights, security, and appliances from one app.' },
-  { icon: '🌱', title: 'Green Tech', desc: 'Solar + EV charging for a sustainable Lagos home.' },
-  { icon: '👨‍👩‍👧', title: 'Family Safety', desc: 'Parental controls, baby monitors and family bundles.' },
+  {
+    icon: <Play size={20} className="text-[#FFCB00]" />,
+    title: 'Entertainment',
+    desc: 'Stream Netflix, Showmax and DSTV in 4K. Completely buffer-free.',
+  },
+  {
+    icon: <Zap size={20} className="text-[#FFCB00]" />,
+    title: 'Ultra-Low Latency',
+    desc: 'Sub-5ms ping for competitive gaming. Zero packet loss on video calls.',
+  },
+  {
+    icon: <Home size={20} className="text-[#FFCB00]" />,
+    title: 'Smart Home Control',
+    desc: 'Lights, climate, security — all managed from a single app.',
+  },
+  {
+    icon: <Shield size={20} className="text-[#FFCB00]" />,
+    title: 'Family Safety',
+    desc: 'Parental controls, baby monitors and family bundles built in.',
+  },
+  {
+    icon: <Clock size={20} className="text-[#FFCB00]" />,
+    title: '24 / 7 Support',
+    desc: 'Nigeria-based team available round the clock with SLA-backed uptime.',
+  },
+  {
+    icon: <Wifi size={20} className="text-[#FFCB00]" />,
+    title: 'Whole-Home Coverage',
+    desc: 'Wi-Fi 6 mesh router included. Every room, full signal, no dead zones.',
+  },
 ];
 
-const rooms = [
-  { name: 'Living Room', icon: '🛋️', color: 'bg-amber-50 border-amber-200', href: '/experience?room=living-room' },
-  { name: 'Master Bedroom', icon: '🛏️', color: 'bg-purple-50 border-purple-200', href: '/experience?room=master-bedroom' },
-  { name: 'Kitchen', icon: '🍳', color: 'bg-green-50 border-green-200', href: '/experience?room=kitchen' },
-  { name: 'Home Office', icon: '💼', color: 'bg-blue-50 border-blue-200', href: '/experience?room=home-office' },
-  { name: 'Kids Bedroom', icon: '🧸', color: 'bg-pink-50 border-pink-200', href: '/experience?room=kids-bedroom' },
-  { name: 'Patio', icon: '🌿', color: 'bg-teal-50 border-teal-200', href: '/experience?room=patio' },
-  { name: 'Garage', icon: '🚗', color: 'bg-gray-50 border-gray-200', href: '/experience?room=garage' },
+const testimonials = [
+  {
+    name: 'Chioma A.', loc: 'Victoria Island', init: 'C',
+    quote: 'MTN Fibre transformed our home. The kids love gaming, I love streaming, my husband works from home — zero drops.',
+  },
+  {
+    name: 'Emeka O.', loc: 'Lekki Phase 1', init: 'E',
+    quote: 'Unreal speeds. I run HD video calls all day. The smart home bundle was the best investment we\'ve made.',
+  },
+  {
+    name: 'Amaka B.', loc: 'Ikeja GRA', init: 'A',
+    quote: 'Robot vacuum, smart lighting, everything works together seamlessly. Fibre Prime is a lifestyle upgrade.',
+  },
 ];
 
+const bundleItems = ['Fibre 500 Mbps', 'Netflix', 'Smart TV', 'Robot Vacuum', 'Smart Lights', 'Solar System'];
+
+/* ── Page ─────────────────────────────────────────── */
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-mtn-bg font-mtn">
+    <div className="min-h-screen bg-[#F5F5F5] font-[MTN_Brighter_Sans,system-ui,sans-serif]">
       <Navigation />
       <NotificationToast />
+      <BundleWidget />
 
-      {/* HERO SECTION */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-16">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-mtn-black via-gray-900 to-gray-800" />
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 25% 50%, #FFCB00 0%, transparent 50%), radial-gradient(circle at 75% 20%, #FFCB00 0%, transparent 40%)' }} />
+      {/* ─── HERO ───────────────────────────────────────────── */}
+      <section className="relative min-h-screen flex flex-col justify-center bg-black overflow-hidden pt-[var(--nav-height)]">
+        {/* Grid texture */}
+        <div
+          className="absolute inset-0 opacity-[0.035]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+        {/* Yellow radial glow */}
+        <div
+          className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2
+                     w-[700px] h-[700px] rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(255,203,0,0.08) 0%, transparent 65%)' }}
+        />
+        {/* Decorative house silhouette hint */}
+        <div
+          className="absolute right-0 top-0 bottom-0 w-1/2 opacity-[0.03] pointer-events-none
+                     hidden lg:block"
+          style={{
+            backgroundImage: 'linear-gradient(135deg, rgba(255,203,0,0.4) 0%, transparent 60%)',
+          }}
+        />
 
-        {/* Animated grid */}
-        <div className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: 'linear-gradient(rgba(255,203,0,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,203,0,0.5) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
-
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 text-center">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 bg-mtn-yellow/10 border border-mtn-yellow/30 text-mtn-yellow px-4 py-2 rounded-full text-sm font-semibold mb-8"
-          >
-            <span className="w-2 h-2 bg-mtn-yellow rounded-full animate-pulse" />
-            MTN Fibre Prime — Now in Lagos
-          </motion.div>
-
-          {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white leading-tight mb-6"
-          >
-            Not just internet.
-            <br />
-            <span className="text-mtn-yellow">An ecosystem.</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed"
-          >
-            Explore the digital twin of a connected Lagos home. Walk through 7 rooms,
-            interact with smart devices, and build your perfect Fibre Prime bundle.
-          </motion.p>
-
-          {/* CTA buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-          >
-            <Link href="/experience" className="mtn-btn-primary text-base px-8 py-4 rounded-2xl shadow-lg shadow-yellow-500/20 group">
-              <span>Enter the Home</span>
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link href="/plans" className="flex items-center gap-2 text-white border border-white/20 hover:border-white/50 px-8 py-4 rounded-2xl transition-all text-base font-semibold group">
-              <Wifi size={20} />
-              Check Availability
-            </Link>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mt-16 max-w-3xl mx-auto"
-          >
-            {stats.map((stat) => (
-              <div key={stat.label} className="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-4 text-center">
-                <div className="text-2xl mb-1">{stat.icon}</div>
-                <div className="text-2xl font-bold text-mtn-yellow">{stat.value}</div>
-                <div className="text-xs text-gray-400 mt-1">{stat.label}</div>
+        <div className="page-container relative z-10 py-24">
+          <div className="max-w-3xl">
+            {/* Pill badge */}
+            <FadeUp delay={0}>
+              <div
+                className="inline-flex items-center gap-2 mb-8
+                           border border-[#FFCB00]/25 text-[#FFCB00]
+                           text-[11px] font-bold uppercase tracking-[0.14em]
+                           px-4 py-2 rounded-full"
+              >
+                <span className="w-1.5 h-1.5 bg-[#FFCB00] rounded-full animate-pulse" />
+                Now Live in Lagos
               </div>
-            ))}
-          </motion.div>
+            </FadeUp>
+
+            {/* Headline */}
+            <FadeUp delay={0.08}>
+              <h1 className="text-hero text-white mb-6">
+                Not just internet.
+                <br />
+                <span className="text-[#FFCB00]">An ecosystem.</span>
+              </h1>
+            </FadeUp>
+
+            {/* Sub */}
+            <FadeUp delay={0.16}>
+              <p className="text-white/55 text-lg leading-relaxed mb-10 max-w-[520px]">
+                Explore the digital twin of a connected Lagos home. Interact with smart
+                devices across 7 rooms and build your perfect Fibre Prime bundle.
+              </p>
+            </FadeUp>
+
+            {/* CTA row */}
+            <FadeUp delay={0.24} className="flex flex-wrap items-center gap-4">
+              <Link href="/experience" className="btn-primary text-[15px] px-8 py-4 rounded-xl group">
+                Enter the Home
+                <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+              <Link href="/plans" className="btn-ghost text-[15px] px-8 py-4 rounded-xl">
+                <Wifi size={18} />
+                Check Availability
+              </Link>
+            </FadeUp>
+
+            {/* Stats */}
+            <FadeUp delay={0.38}>
+              <div className="flex flex-wrap gap-8 mt-16 pt-12 border-t border-white/8">
+                {stats.map((s) => (
+                  <div key={s.label}>
+                    <p className="text-[#FFCB00] text-[22px] font-bold leading-none">{s.value}</p>
+                    <p className="text-white/35 text-[12px] mt-1 tracking-wide">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            </FadeUp>
+          </div>
         </div>
 
-        {/* Scroll cue */}
+        {/* Scroll indicator */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, y: [0, 8, 0] }}
-          transition={{ delay: 1.5, duration: 2, repeat: Infinity }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/40"
+          animate={{ y: [0, 7, 0] }}
+          transition={{ repeat: Infinity, duration: 2.4, delay: 1.8 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/20"
         >
-          <ChevronDown size={28} />
+          <ChevronDown size={24} />
         </motion.div>
       </section>
 
-      {/* INTERACTIVE HOME PREVIEW */}
-      <section className="py-20 px-4 sm:px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-mtn-black mb-4">
-              Explore Every Room
-            </h2>
-            <p className="text-gray-600 max-w-xl mx-auto">
-              Click any room to discover the connected devices, services and bundles 
-              that make life smarter with MTN Fibre Prime.
+      {/* ─── ROOMS OVERVIEW ───────────────────────────────── */}
+      <section className="section bg-[#F5F5F5]">
+        <div className="page-container">
+          <InView className="text-center mb-12">
+            <p className="section-label mb-3">Interactive Experience</p>
+            <h2 className="section-title text-black">Explore Every Room</h2>
+            <p className="text-[#888] text-base mt-3 max-w-md mx-auto leading-relaxed">
+              Click any room to discover the devices, services and bundles that make life smarter.
             </p>
-          </motion.div>
+          </InView>
 
-          {/* Home floor plan grid */}
-          <div className="relative bg-mtn-bg rounded-3xl p-6 sm:p-10 border-2 border-mtn-grey overflow-hidden">
-            {/* Decorative label */}
-            <div className="absolute top-4 right-4 bg-mtn-yellow text-mtn-black text-xs font-bold px-3 py-1 rounded-full">
-              🏠 Interactive Home
+          {/* House card */}
+          <div
+            className="bg-white rounded-[20px] border border-[#E5E5E5] p-6 sm:p-10"
+            style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}
+          >
+            {/* Card header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="w-8 h-8 bg-[#FFCB00] rounded-lg flex items-center justify-center
+                             font-bold text-[11px] text-black"
+                >
+                  MTN
+                </div>
+                <span className="font-bold text-black text-sm">3-Bedroom Lagos Smart Home</span>
+              </div>
+              <div className="flex items-center gap-2 text-[12px] text-[#888]">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                All systems online
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {/* Rooms grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {rooms.map((room, i) => (
-                <motion.div
-                  key={room.name}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.08 }}
-                >
+                <InView key={room.id} delay={i * 0.055}>
                   <Link
-                    href={room.href}
-                    className={`room-card flex flex-col items-center justify-center p-6 border-2 ${room.color} group min-h-[120px]`}
+                    href={`/experience?room=${room.id}`}
+                    className="group fp-card flex flex-col
+                               p-5 min-h-[120px]
+                               hover:-translate-y-1 hover:border-[#FFCB00]/50
+                               hover:shadow-[0_8px_24px_rgba(255,203,0,0.12)]
+                               transition-all duration-200"
                   >
-                    <span className="text-4xl mb-2 group-hover:scale-110 transition-transform duration-200">
+                    <span className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-200 inline-block">
                       {room.icon}
                     </span>
-                    <span className="text-sm font-bold text-mtn-black text-center leading-tight">
+                    <p className="font-bold text-[13px] text-black leading-tight mb-0.5">
                       {room.name}
-                    </span>
-                    <span className="mt-2 text-xs text-mtn-yellow font-semibold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                      Explore <ArrowRight size={12} />
-                    </span>
+                    </p>
+                    <p className="text-[#888] text-[11px]">{room.theme}</p>
+                    <div className="mt-auto pt-3 flex items-center justify-between">
+                      <span className="text-[10px] text-[#888]">{room.devices} devices</span>
+                      <span
+                        className="text-[10px] font-bold text-[#FFCB00]
+                                   opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        Explore →
+                      </span>
+                    </div>
                   </Link>
-                </motion.div>
+                </InView>
               ))}
 
-              {/* Full experience CTA */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: rooms.length * 0.08 }}
-              >
+              {/* Full tour card */}
+              <InView delay={rooms.length * 0.055}>
                 <Link
                   href="/experience"
-                  className="room-card flex flex-col items-center justify-center p-6 bg-mtn-black text-white border-2 border-mtn-black group min-h-[120px]"
+                  className="group flex flex-col items-center justify-center
+                             min-h-[120px] fp-card-dark rounded-[12px]
+                             text-center p-5
+                             hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.25)]
+                             transition-all duration-200 border border-white/6"
                 >
-                  <Play size={32} className="mb-2 text-mtn-yellow group-hover:scale-110 transition-transform" />
-                  <span className="text-sm font-bold text-center leading-tight">Full Home Tour</span>
-                  <span className="mt-1 text-xs text-gray-400">All rooms →</span>
+                  <div
+                    className="w-11 h-11 rounded-full bg-[#FFCB00]/15 border border-[#FFCB00]/30
+                               flex items-center justify-center mb-3
+                               group-hover:bg-[#FFCB00]/25 transition-colors"
+                  >
+                    <Play size={18} className="text-[#FFCB00]" />
+                  </div>
+                  <p className="font-bold text-white text-[13px]">Full Home Tour</p>
+                  <p className="text-white/35 text-[11px] mt-0.5">All 7 rooms →</p>
                 </Link>
-              </motion.div>
+              </InView>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section className="py-20 px-4 sm:px-6 bg-mtn-bg">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-mtn-black mb-4">
-              Powered by MTN Fibre Prime
-            </h2>
-            <p className="text-gray-600 max-w-xl mx-auto">
-              One platform. Every room. Every device. Every lifestyle.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* ─── FEATURES ─────────────────────────────────────── */}
+      <section className="section bg-white">
+        <div className="page-container">
+          <InView className="text-center mb-12">
+            <p className="section-label mb-3">Powered by Fibre Prime</p>
+            <h2 className="section-title text-black">One Platform. Every Room.</h2>
+          </InView>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="mtn-card p-6 hover:shadow-md transition-all hover:-translate-y-1"
-              >
-                <div className="text-4xl mb-4">{f.icon}</div>
-                <h3 className="font-bold text-lg text-mtn-black mb-2">{f.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{f.desc}</p>
-              </motion.div>
+              <InView key={f.title} delay={i * 0.07}>
+                <div
+                  className="fp-card p-6 hover:-translate-y-1
+                             hover:shadow-[0_8px_28px_rgba(0,0,0,0.09)]
+                             hover:border-[#FFCB00]/30
+                             transition-all duration-200 group"
+                >
+                  <div
+                    className="w-11 h-11 bg-[#FFCB00]/10 rounded-xl
+                               flex items-center justify-center mb-4
+                               group-hover:bg-[#FFCB00]/20 transition-colors duration-200"
+                  >
+                    {f.icon}
+                  </div>
+                  <h3 className="font-bold text-black mb-2 text-[15px]">{f.title}</h3>
+                  <p className="text-[#666] text-sm leading-relaxed">{f.desc}</p>
+                </div>
+              </InView>
             ))}
           </div>
         </div>
       </section>
 
-      {/* BUNDLE TEASER */}
-      <section className="py-20 px-4 sm:px-6 bg-mtn-black text-white overflow-hidden relative">
-        <div className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: 'radial-gradient(circle at 50% 50%, #FFCB00 0%, transparent 60%)' }} />
-        <div className="relative max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <div className="text-mtn-yellow font-bold text-sm uppercase tracking-widest mb-4">Bundle Builder</div>
-            <h2 className="text-3xl sm:text-5xl font-bold mb-6">
-              Build Your Perfect <br /><span className="text-mtn-yellow">Fibre Prime Bundle</span>
+      {/* ─── BUNDLE CTA ───────────────────────────────────── */}
+      <section className="section bg-black">
+        <div className="page-container">
+          <InView className="max-w-2xl mx-auto text-center">
+            <p className="section-label mb-4">Bundle Builder</p>
+            <h2 className="text-page text-white mb-5 leading-tight">
+              Build Your Perfect
+              <br />
+              <span className="text-[#FFCB00]">Fibre Prime Bundle</span>
             </h2>
-            <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto">
-              Mix and match devices, content, and services. Pay one monthly price. 
+            <p className="text-white/45 text-base mb-10 leading-relaxed">
+              Mix devices, content and services into one monthly subscription.
               Cancel anytime.
             </p>
-            <div className="flex flex-wrap justify-center gap-3 mb-10">
-              {['Fibre 500 Mbps', 'Netflix', 'Smart TV', 'Robot Vacuum', 'Smart Lights', '+ More'].map((item) => (
-                <span key={item} className="flex items-center gap-2 bg-white/10 border border-white/20 px-4 py-2 rounded-full text-sm font-semibold">
-                  <Check size={14} className="text-mtn-yellow" />
+
+            {/* Bundle items preview */}
+            <div className="flex flex-wrap justify-center gap-2 mb-10">
+              {bundleItems.map((item) => (
+                <span
+                  key={item}
+                  className="flex items-center gap-1.5
+                             border border-white/12 bg-white/4
+                             text-white/65 text-xs font-medium
+                             px-3.5 py-1.5 rounded-full"
+                >
+                  <Check size={10} className="text-[#FFCB00]" />
                   {item}
                 </span>
               ))}
             </div>
-            <Link href="/bundles" className="mtn-btn-primary text-base px-10 py-4 rounded-2xl">
-              Build My Bundle <ArrowRight size={18} />
+
+            <Link href="/bundles" className="btn-primary text-[15px] px-10 py-4 rounded-xl">
+              Build My Bundle
+              <ArrowRight size={18} />
             </Link>
-          </motion.div>
+          </InView>
         </div>
       </section>
 
-      {/* SOCIAL PROOF */}
-      <section className="py-20 px-4 sm:px-6 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl font-bold text-mtn-black mb-2">What Lagos homes are saying</h2>
-            <div className="flex justify-center gap-1 text-mtn-yellow">
-              {[...Array(5)].map((_, i) => <Star key={i} size={20} fill="currentColor" />)}
-            </div>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {[
-              { name: 'Chioma A.', loc: 'Victoria Island', quote: 'MTN Fibre changed our home completely. The kids love the gaming, I love the streaming, and my husband works from home seamlessly.', rating: 5 },
-              { name: 'Emeka O.', loc: 'Lekki Phase 1', quote: 'The speed is incredible. I run video calls all day with zero drops. The smart home bundle was the best investment we made.', rating: 5 },
-              { name: 'Amaka B.', loc: 'Ikeja GRA', quote: 'From the robot vacuum to the smart lighting, everything just works together. Fibre Prime is a lifestyle upgrade.', rating: 5 },
-            ].map((review, i) => (
-              <motion.div
-                key={review.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15 }}
-                className="mtn-card p-6"
-              >
-                <div className="flex gap-1 mb-4">
-                  {[...Array(review.rating)].map((_, j) => (
-                    <Star key={j} size={14} className="text-mtn-yellow" fill="currentColor" />
-                  ))}
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed mb-4">"{review.quote}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-mtn-yellow rounded-full flex items-center justify-center text-mtn-black font-bold text-sm">
-                    {review.name[0]}
+      {/* ─── TESTIMONIALS ─────────────────────────────────── */}
+      <section className="section bg-[#F5F5F5]">
+        <div className="page-container">
+          <InView className="text-center mb-12">
+            <p className="section-label mb-3">Customer Stories</p>
+            <h2 className="section-title text-black">What Lagos homes are saying</h2>
+          </InView>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {testimonials.map((r, i) => (
+              <InView key={r.name} delay={i * 0.1}>
+                <div className="fp-card p-6 h-full flex flex-col">
+                  {/* Stars */}
+                  <div className="flex gap-0.5 mb-4">
+                    {[...Array(5)].map((_, j) => (
+                      <span key={j} className="text-[#FFCB00] text-sm">★</span>
+                    ))}
                   </div>
-                  <div>
-                    <div className="font-bold text-sm text-mtn-black">{review.name}</div>
-                    <div className="text-xs text-gray-500">{review.loc}</div>
+                  <p className="text-[#555] text-sm leading-relaxed flex-1">
+                    &ldquo;{r.quote}&rdquo;
+                  </p>
+                  {/* Author */}
+                  <div className="flex items-center gap-3 mt-5 pt-5 border-t border-[#E5E5E5]">
+                    <div
+                      className="w-10 h-10 bg-[#FFCB00] rounded-full
+                                 flex items-center justify-center
+                                 font-bold text-sm text-black shrink-0"
+                    >
+                      {r.init}
+                    </div>
+                    <div>
+                      <p className="font-bold text-[13px] text-black">{r.name}</p>
+                      <p className="text-[#AAA] text-[12px]">{r.loc}</p>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
+              </InView>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="py-20 px-4 sm:px-6 bg-mtn-yellow">
-        <div className="max-w-3xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-3xl sm:text-5xl font-bold text-mtn-black mb-6">
+      {/* ─── FINAL CTA ────────────────────────────────────── */}
+      <section className="section bg-[#FFCB00]">
+        <div className="page-container text-center">
+          <InView>
+            <h2 className="section-title text-black mb-4">
               Ready to connect your home?
             </h2>
-            <p className="text-mtn-black/70 text-lg mb-10">
-              Check if MTN Fibre Prime is available in your area and get connected today.
+            <p className="text-black/55 text-base mb-8 max-w-md mx-auto leading-relaxed">
+              Check if MTN Fibre Prime is available in your area and get started today.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/plans" className="mtn-btn-secondary text-base px-10 py-4 rounded-2xl">
-                <Wifi size={20} />
-                Check Availability
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link href="/plans" className="btn-secondary px-10 py-4 rounded-xl text-[15px]">
+                <Wifi size={18} /> Check Availability
               </Link>
-              <Link href="/experience" className="mtn-btn-outline text-base px-10 py-4 rounded-2xl border-mtn-black">
-                <Play size={20} />
-                Explore the Home
+              <Link
+                href="/experience"
+                className="btn-ghost-dark px-8 py-4 rounded-xl text-[15px]"
+              >
+                <Play size={18} /> Explore the Home
               </Link>
             </div>
-          </motion.div>
+          </InView>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-mtn-black text-white py-12 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+      {/* ─── FOOTER ───────────────────────────────────────── */}
+      <footer className="bg-black border-t border-white/8 py-12">
+        <div className="page-container">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            {/* Brand */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-mtn-yellow rounded-xl flex items-center justify-center font-bold text-sm text-mtn-black">
+              <div
+                className="w-9 h-9 bg-[#FFCB00] rounded-lg flex items-center justify-center
+                           font-bold text-[11px] text-black"
+              >
                 MTN
               </div>
               <div>
-                <div className="font-bold text-white">MTN Fibre Prime</div>
-                <div className="text-xs text-gray-500">Nigeria's #1 Home Fibre Experience</div>
+                <p className="text-white font-bold text-sm">Fibre Prime</p>
+                <p className="text-white/25 text-[11px]">Nigeria's #1 Home Fibre</p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-6 text-sm text-gray-400">
-              <Link href="/experience" className="hover:text-mtn-yellow transition-colors">Home Experience</Link>
-              <Link href="/marketplace" className="hover:text-mtn-yellow transition-colors">Marketplace</Link>
-              <Link href="/bundles" className="hover:text-mtn-yellow transition-colors">Bundles</Link>
-              <Link href="/plans" className="hover:text-mtn-yellow transition-colors">Fibre Plans</Link>
-            </div>
+
+            {/* Nav links */}
+            <nav className="flex flex-wrap gap-6 text-[13px] text-white/35">
+              {[
+                { href: '/experience',  l: 'Home Experience' },
+                { href: '/marketplace', l: 'Marketplace' },
+                { href: '/bundles',     l: 'Bundles' },
+                { href: '/plans',       l: 'Fibre Plans' },
+              ].map(({ href, l }) => (
+                <Link key={href} href={href} className="hover:text-white transition-colors duration-150">
+                  {l}
+                </Link>
+              ))}
+            </nav>
           </div>
-          <div className="mt-8 pt-8 border-t border-white/10 text-sm text-gray-600 text-center">
-            © {new Date().getFullYear()} MTN Nigeria. All rights reserved. MTN Fibre Prime Interactive Home Experience.
+
+          <div className="mt-8 pt-6 border-t border-white/8">
+            <p className="text-white/18 text-xs text-center">
+              © {new Date().getFullYear()} MTN Nigeria Communications Plc. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
